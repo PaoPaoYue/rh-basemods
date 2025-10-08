@@ -1,0 +1,1 @@
+Copy `Assembly-CSharp.dll` from `RouletteHero_Data\Managed` folder inside the game here.
