@@ -24,6 +24,10 @@
       <HintPath>../libs/Assembly-CSharp.dll</HintPath>
       <Private>false</Private>
     </Reference>
+      <Reference Include="PreloaderAssembly">
+      <HintPath>../libs/ModDLLPreloader.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">

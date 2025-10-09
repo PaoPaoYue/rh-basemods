@@ -31,27 +31,27 @@ namespace ModDllPreloader
             }
         }
 
-        private static List<ModInfo> EnabledMods = [];
+        private static List<ModInfo> enabledMods = [];
 
         public static IReadOnlyList<ModInfo> GetAllEnabledMods()
         {
-            return EnabledMods.AsReadOnly();
+            return enabledMods.AsReadOnly();
         }
 
         public static ModInfo GetModInfo(string modName)
         {
-            return EnabledMods.FirstOrDefault(m => m.ModName.Equals(modName, StringComparison.OrdinalIgnoreCase));
+            return enabledMods.FirstOrDefault(m => m.ModName.Equals(modName, StringComparison.OrdinalIgnoreCase));
         }
 
         public static int GetModIndex(string modName)
         {
-            return EnabledMods.FindIndex(m => m.ModName.Equals(modName, StringComparison.OrdinalIgnoreCase));
+            return enabledMods.FindIndex(m => m.ModName.Equals(modName, StringComparison.OrdinalIgnoreCase));
         }
 
         public static ModInfo GetModInfoByCallingDll()
         {
             string dllPath = Assembly.GetCallingAssembly().Location;
-            return EnabledMods.FirstOrDefault(m => m.Dlls.Contains(dllPath));
+            return enabledMods.FirstOrDefault(m => m.Dlls.Contains(dllPath));
         }
 
         private class PreloaderConfig
@@ -81,7 +81,6 @@ namespace ModDllPreloader
         {
             try
             {
-                Logger.LogInfo("Initializing...");
                 var config = LoadConfig();
                 var mods = ScanMods(config);
                 FilterAndDeploy(config, mods);
@@ -205,10 +204,10 @@ namespace ModDllPreloader
 
             // 更新全局 EnabledMods 列表
             if (cfg.Include.Count > 0 || cfg.Exclude.Count > 0)
-                EnabledMods = [.. mods.Where(m => cfg.Include.Contains(m.ModName) && !cfg.Exclude.Contains(m.ModName))];
+                enabledMods = [.. mods.Where(m => cfg.Include.Contains(m.ModName) && !cfg.Exclude.Contains(m.ModName))];
             else
-                EnabledMods = [.. mods];
-            Logger.LogInfo($"Scan complete. Start importing {EnabledMods.Sum(m => m.Dlls.Count)} DLLs in {EnabledMods.Count} MODs .");
+                enabledMods = [.. mods];
+            Logger.LogInfo($"Scan complete. Start importing {enabledMods.Sum(m => m.Dlls.Count)} DLLs in {enabledMods.Count} MODs .");
 
             // 清空 plugins 目录
             if (Directory.Exists(PluginDir))
@@ -232,7 +231,7 @@ namespace ModDllPreloader
 
             // 拷贝被 include 的 mod 的 DLL
             var failedMods = new List<string>();
-            foreach (var mod in EnabledMods)
+            foreach (var mod in enabledMods)
             {
 
                 foreach (var dll in mod.Dlls)
@@ -252,8 +251,8 @@ namespace ModDllPreloader
             }
 
             // 移除导入失败的 mod
-            EnabledMods.RemoveAll(m => failedMods.Contains(m.ModName));
-            Logger.LogInfo($"Completed. Imported {EnabledMods.Sum(m => m.Dlls.Count)} DLLs in {EnabledMods.Count} MODs.");
+            enabledMods.RemoveAll(m => failedMods.Contains(m.ModName));
+            Logger.LogInfo($"Completed. Imported {enabledMods.Sum(m => m.Dlls.Count)} DLLs in {enabledMods.Count} MODs.");
 
         }
     }

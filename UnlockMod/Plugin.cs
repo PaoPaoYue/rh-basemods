@@ -1,7 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using System.Reflection;
 using Game;
 
 namespace UnlockMod;
@@ -23,7 +22,7 @@ class UnlockPatch
 {
     [HarmonyPatch(typeof(GameManager), "Initialize")]
     [HarmonyPrefix]
-    static void RollRealDice(ref GameManager __instance)
+    static void GameManagerInitializePrefix(ref GameManager __instance)
     {
         __instance.GMEnable= true;
         Plugin.Logger.LogInfo("GM panel enabled!");

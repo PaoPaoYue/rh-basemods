@@ -7,11 +7,15 @@ namespace BaseMod;
 public class Plugin : BaseUnityPlugin
 {
     internal static new ManualLogSource Logger;
-        
+
     private void Awake()
     {
-        // Plugin startup logic
         Logger = base.Logger;
-        Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
+        Logger.LogInfo("Initializing...");
+        HarmonyLib.Harmony.CreateAndPatchAll(typeof(ModModelPatch));
+        HarmonyLib.Harmony.CreateAndPatchAll(typeof(BattleOrderManagerPatch));
+        HarmonyLib.Harmony.CreateAndPatchAll(typeof(ElementEntityPatch));
+        HarmonyLib.Harmony.CreateAndPatchAll(typeof(RelicEntityPatch));
+        Logger.LogInfo("Initialization completed!");
     }
 }
