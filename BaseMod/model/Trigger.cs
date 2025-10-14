@@ -4,13 +4,23 @@ using Game;
 
 namespace BaseMod;
 
-public interface IElementTrigger
+public abstract class ElementTrigger
 {
-    public bool OnTrigger(Entity element, Element elementConf, EventArg rEventArg, out List<int> actionParams);
+    public int EventId;
+    public ElementTrigger(int eventId)
+    {
+        EventId = eventId;
+    }
+    public abstract bool OnTrigger(Entity element, Element elementConf, EventArg rEventArg, out List<int> actionParams);
 }
 
-public interface IRelicTrigger
+public abstract class RelicTrigger
 {
-    public bool OnTrigger(Entity relic, Relics relicConf, EventArg rEventArg, out List<int> actionParams);
+    public int EventId;
+    public RelicTrigger(int eventId)
+    {
+        EventId = eventId;
+    }
+    public abstract bool OnTrigger(Entity relic, Relics relicConf, EventArg rEventArg, out List<int> actionParams);
 }
 

@@ -8,7 +8,7 @@ public static class ReflectionUtil
     private static readonly ConcurrentDictionary<(Type, string), PropertyInfo> _propertyCache = new();
     private static readonly ConcurrentDictionary<(Type, string), MethodInfo> _methodCache = new();
 
-    // ----------------------- 缓存基础方法 -----------------------
+    // ----------------------- cache -----------------------
     private static bool TryGetCachedMember<T>(ConcurrentDictionary<(Type, string), T> cache, Type type, string name, out T member)
         where T : class
     {

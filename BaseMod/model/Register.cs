@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Game;
-using ModDllPreloader;
+using cfg;
 
 namespace BaseMod;
 
@@ -10,7 +10,7 @@ namespace BaseMod;
 public class ModRegister
 {
 
-    public static int ModMinId = 10_000;
+    public static int ModMinId = 100_000;
     public static int ModMaxId = 10_000_000 - 1;
 
     public static bool IsValidModId(int id)
@@ -39,31 +39,29 @@ public class ModRegister
         }
 
         var modRegister = new ModRegister(modName, superMods);
-        GlobalRegister.AddModRegister(modName, modRegister);
+        modRegister.ModIndex = GlobalRegister.AddModRegister(modName, modRegister);
         return modRegister;
     }
 
     public string ModName { get; private set; }
 
-    internal int ModIndex;
-    internal List<ModRegister> superRegisters = new List<ModRegister>();
+    internal int ModIndex { get; private set; }
 
-    private Dictionary<int, IEventAction> eventActionDict = new Dictionary<int, IEventAction>(); // id -> action
-    private Dictionary<int, (int, IElementTrigger)> elementTriggerDict = new Dictionary<int, (int, IElementTrigger)>(); // id -> (eventId, trigger)
-    private Dictionary<int, (int, IRelicTrigger)> relicTriggerDict = new Dictionary<int, (int, IRelicTrigger)>(); // id -> (eventId, trigger)
-    private Dictionary<string, int> nameToEventDict = new Dictionary<string, int>(); // name -> eventId
+    internal List<ModRegister> superRegisters = [];
+
+    private Dictionary<int, IEventAction> eventActionDict = []; // id -> action
+    private Dictionary<int, ElementTrigger> elementTriggerDict = []; // id -> (eventId, trigger)
+    private Dictionary<int, RelicTrigger> relicTriggerDict = []; // id -> (eventId, trigger)
+    private Dictionary<int, DescTip> descTipDict = []; // id -> descTip
+
+    private Dictionary<string, int> nameToEventDict = []; // name -> eventId
     private int eventCounter = 1;
-    private Dictionary<string, int> entityAttributeDict = new Dictionary<string, int>(); // name -> attrId
+    private Dictionary<string, int> entityAttributeDict = []; // name -> attrId
     private int entityAttributeCounter = 1;
-
+    
     private ModRegister(string modName, List<ModRegister> superRegisters = null)
     {
         ModName = modName;
-        ModIndex = Preloader.GetModIndex(modName);
-        if (ModIndex == -1)
-        {
-            throw new Exception($"Mod {ModName} is not enabled or not found!");
-        }
         if (superRegisters != null)
         {
             this.superRegisters = superRegisters;
@@ -80,26 +78,24 @@ public class ModRegister
         GlobalRegister.AddRegistered(this, id, action);
     }
 
-    public void RegisterElementTrigger(int id, int eventId, IElementTrigger trigger)
+    public void RegisterElementTrigger(int id, ElementTrigger trigger)
     {
         if (elementTriggerDict.ContainsKey(id))
         {
             throw new Exception($"Element trigger with id {id} already registered in mod {ModName}!");
         }
-        var binding = new ValueTuple<int, IElementTrigger>(eventId, trigger);
-        elementTriggerDict[id] = binding;
-        GlobalRegister.AddRegistered(this, id, binding);
+        elementTriggerDict[id] = trigger;
+        GlobalRegister.AddRegistered(this, id, trigger);
     }
 
-    public void RegisterRelicTrigger(int id, int eventId, IRelicTrigger trigger)
+    public void RegisterRelicTrigger(int id, RelicTrigger trigger)
     {
         if (relicTriggerDict.ContainsKey(id))
         {
             throw new Exception($"Relic trigger with id {id} already registered in mod {ModName}!");
         }
-        var binding = new ValueTuple<int, IRelicTrigger>(eventId, trigger);
-        relicTriggerDict[id] = binding;
-        GlobalRegister.AddRegistered(this, id, binding);
+        relicTriggerDict[id] = trigger;
+        GlobalRegister.AddRegistered(this, id, trigger);
     }
 
     public void RegisterEvent(string name)
@@ -123,6 +119,36 @@ public class ModRegister
         return attrId;
     }
 
+    public int RegisterVisableAttribute(string name, string icon, int type) // type: 0 int, 1 percent
+    {
+        if (entityAttributeDict.ContainsKey(name))
+        {
+            throw new Exception($"Entity attribute name {name} already registered in mod {ModName}!");
+        }
+        var attrId = ConvertToGlobalId(entityAttributeCounter++);
+        entityAttributeDict[name] = attrId;
+
+        cfg.Attribute attr = new();
+        ReflectionUtil.TrySetReadonlyField(attr, "Id", attrId);
+        ReflectionUtil.TrySetReadonlyField(attr, "NameID", attrId);
+        ReflectionUtil.TrySetReadonlyField(attr, "Icon", icon);
+        ReflectionUtil.TrySetReadonlyField(attr, "AttributeType", type);
+
+        GlobalRegister.AddRegistered(this, attrId, attr);
+        return attrId;
+
+    }   
+
+    public void RegisterDescTip(int id, DescTip descTip)
+    {
+        if (descTipDict.ContainsKey(id))
+        {
+            throw new Exception($"DescTip with id {id} already registered in mod {ModName}!");
+        }
+        descTipDict[id] = descTip;
+        GlobalRegister.AddRegistered(this, id, descTip);
+    }
+
     public IEventAction GetEventAction(int id)
     {
         if (eventActionDict.ContainsKey(id))
@@ -140,7 +166,7 @@ public class ModRegister
         return null;
     }
 
-    public ValueTuple<int, IElementTrigger> GetElementTrigger(int id)
+    public ElementTrigger GetElementTrigger(int id)
     {
         if (elementTriggerDict.ContainsKey(id))
         {
@@ -148,16 +174,16 @@ public class ModRegister
         }
         foreach (var super in superRegisters)
         {
-            var binding = super.GetElementTrigger(id);
-            if (binding != default)
+            var trigger = super.GetElementTrigger(id);
+            if (trigger != default)
             {
-                return binding;
+                return trigger;
             }
         }
         return default;
     }
 
-    public ValueTuple<int, IRelicTrigger> GetRelicTrigger(int id)
+    public RelicTrigger GetRelicTrigger(int id)
     {
         if (relicTriggerDict.ContainsKey(id))
         {
@@ -165,10 +191,10 @@ public class ModRegister
         }
         foreach (var super in superRegisters)
         {
-            var binding = super.GetRelicTrigger(id);
-            if (binding != default)
+            var trigger = super.GetRelicTrigger(id);
+            if (trigger != default)
             {
-                return binding;
+                return trigger;
             }
         }
         return default;
@@ -208,10 +234,27 @@ public class ModRegister
         return -1;
     }
 
+    public DescTip GetDescTip(int id)
+    {
+        if (descTipDict.ContainsKey(id))
+        {
+            return descTipDict[id];
+        }
+        foreach (var super in superRegisters)
+        {
+            var descTip = super.GetDescTip(id);
+            if (descTip != null)
+            {
+                return descTip;
+            }
+        }
+        return null;
+    }
+
 
     internal int ConvertToGlobalId(int id)
     {
-        return (ModIndex + 1) * (ModMaxId + 1) + id;
+         return (ModIndex + 1) * (ModMaxId + 1) + id;
     }
 
 }
@@ -231,13 +274,14 @@ internal static class GlobalRegister
         return null;
     }
 
-    internal static void AddModRegister(string modName, ModRegister modRegister)
+    internal static int AddModRegister(string modName, ModRegister modRegister)
     {
         if (modRegisters.ContainsKey(modName))
         {
             throw new Exception($"Mod register with name {modName} already exists!");
         }
         modRegisters[modName] = modRegister;
+        return modRegisters.Count - 1;
     }
 
     internal static void AddRegistered<T>(ModRegister modRegister, int id, T value)

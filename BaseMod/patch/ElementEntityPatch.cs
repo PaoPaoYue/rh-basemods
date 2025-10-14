@@ -15,10 +15,10 @@ class ElementEntityPatch
             return;
         if (ModRegister.IsGlobalId(__mTriggerType))
         {
-            if (GlobalRegister.TryGetRegistered<(int, IElementTrigger)>(__mTriggerType, out var binding))
+            if (GlobalRegister.TryGetRegistered<ElementTrigger>(__mTriggerType, out var trigger))
             {
                 if (ReflectionUtil.TryGetPrivateMethod(typeof(ElementEntity), "OnEvent", out MethodInfo onEventMethod))
-                    Singleton<GameEventManager>.Instance.Binding(binding.Item1, (Action<EventArg>)onEventMethod.CreateDelegate(typeof(Action<EventArg>), __instance));
+                    Singleton<GameEventManager>.Instance.Binding(trigger.EventId, (Action<EventArg>)onEventMethod.CreateDelegate(typeof(Action<EventArg>), __instance));
                 else
                     Plugin.Logger.LogError("Failed to patch ElementEntity.Binding, method OnEvent not found!");
             }
@@ -36,10 +36,10 @@ class ElementEntityPatch
             return;
         if (ModRegister.IsGlobalId(__mTriggerType))
         {
-            if (GlobalRegister.TryGetRegistered<(int, IElementTrigger)>(__mTriggerType, out var binding))
+            if (GlobalRegister.TryGetRegistered<ElementTrigger>(__mTriggerType, out var trigger))
             {
                 if (ReflectionUtil.TryGetPrivateMethod(typeof(ElementEntity), "OnEvent", out MethodInfo onEventMethod))
-                    Singleton<GameEventManager>.Instance.Unbinding(binding.Item1, (Action<EventArg>)onEventMethod.CreateDelegate(typeof(Action<EventArg>), __instance));
+                    Singleton<GameEventManager>.Instance.Unbinding(trigger.EventId, (Action<EventArg>)onEventMethod.CreateDelegate(typeof(Action<EventArg>), __instance));
                 else
                     Plugin.Logger.LogError("Failed to patch ElementEntity.Unbinding, method OnEvent not found!");
             }
@@ -55,9 +55,8 @@ class ElementEntityPatch
         if (!ModRegister.IsGlobalId(__mTriggerType) || !__instance.Fill || !__instance.Enable || __instance.Wait)
             return true;
 
-        if (GlobalRegister.TryGetRegistered<(int, IElementTrigger)>(__mTriggerType, out var binding))
+        if (GlobalRegister.TryGetRegistered<ElementTrigger>(__mTriggerType, out var trigger))
         {
-            var trigger = binding.Item2;
             var elementConf = Singleton<Model>.Instance.Element.GetElementConf(__instance.ID);
             if (trigger.OnTrigger(__instance, elementConf, rEventArg, out var ActionParams))
                 Singleton<BattleManager>.Instance.OrderManager.AddEventElement(__instance.Index, __instance.Owner, ActionParams, elementConf.EventTip);

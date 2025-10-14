@@ -16,10 +16,10 @@ class RelicEntityPatch
         var triggerType = Singleton<Model>.Instance.Relic.GetRelicsConf(__instance.ID).TriggerType;
         if (ModRegister.IsGlobalId(triggerType))
         {
-            if (GlobalRegister.TryGetRegistered<(int, IRelicTrigger)>(triggerType, out var binding))
+            if (GlobalRegister.TryGetRegistered<RelicTrigger>(triggerType, out var trigger))
             {
                 if (ReflectionUtil.TryGetPrivateMethod(typeof(RelicEntity), "OnEvent", out MethodInfo onEventMethod))
-                    Singleton<GameEventManager>.Instance.Binding(binding.Item1, (Action<EventArg>)onEventMethod.CreateDelegate(typeof(Action<EventArg>), __instance));
+                    Singleton<GameEventManager>.Instance.Binding(trigger.EventId, (Action<EventArg>)onEventMethod.CreateDelegate(typeof(Action<EventArg>), __instance));
                 else
                     Plugin.Logger.LogError("Failed to patch RelicEntity.Binding, method OnEvent not found!");
             }
@@ -38,10 +38,10 @@ class RelicEntityPatch
         var triggerType = Singleton<Model>.Instance.Relic.GetRelicsConf(__instance.ID).TriggerType;
         if (ModRegister.IsGlobalId(triggerType))
         {
-            if (GlobalRegister.TryGetRegistered<(int, IRelicTrigger)>(triggerType, out var binding))
+            if (GlobalRegister.TryGetRegistered<RelicTrigger>(triggerType, out var trigger))
             {
                 if (ReflectionUtil.TryGetPrivateMethod(typeof(RelicEntity), "OnEvent", out MethodInfo onEventMethod))
-                    Singleton<GameEventManager>.Instance.Unbinding(binding.Item1, (Action<EventArg>)onEventMethod.CreateDelegate(typeof(Action<EventArg>), __instance));
+                    Singleton<GameEventManager>.Instance.Unbinding(trigger.EventId, (Action<EventArg>)onEventMethod.CreateDelegate(typeof(Action<EventArg>), __instance));
                 else
                     Plugin.Logger.LogError("Failed to patch RelicEntity.Unbinding, method OnEvent not found!");
             }
@@ -59,9 +59,8 @@ class RelicEntityPatch
         if (!ModRegister.IsGlobalId(triggerType))
             return true;
 
-        if (GlobalRegister.TryGetRegistered<(int, IRelicTrigger)>(triggerType, out var binding))
+        if (GlobalRegister.TryGetRegistered<RelicTrigger>(triggerType, out var trigger))
         {
-            var trigger = binding.Item2;
             if (trigger.OnTrigger(__instance, RelicConf, rEventArg, out var ActionParams))
                 Singleton<BattleManager>.Instance.OrderManager.AddEventRelic(__instance.Index, __instance.Owner, RelicConf, ActionParams, RelicConf.EventTip);
             return false;
