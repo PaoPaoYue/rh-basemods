@@ -10,48 +10,41 @@ static class BuffModelPatch
 
     [HarmonyPatch(typeof(BuffModel), "GetAttributeIcon")]
     [HarmonyPrefix]
-    static bool GetAttributeIconPrefix(BuffModel __instance, int nAttributeID, ref string __result)
+    static bool GetAttributeIconPrefix(BuffModel __instance, int nAttributeID, ref Dictionary<int, cfg.Attribute> ___mAttributeDict, ref string __result)
     {
-        if (ReflectionUtil.TryGetPrivateField<Dictionary<int, cfg.Attribute>>(__instance, "mAttributeDict", out var mAttributeDict))
+
+        if (___mAttributeDict == null)
         {
-            if (mAttributeDict == null)
+            ___mAttributeDict = DataManager.GetVOData<tbattribute>().DataMap;
+
+            foreach (var (id, attr) in GlobalRegister.EnumerateRegistered<cfg.Attribute>())
             {
-                mAttributeDict = DataManager.GetVOData<tbattribute>().DataMap;
-
-                foreach (var (id, attr) in GlobalRegister.EnumerateRegistered<cfg.Attribute>())
-                {
-                    if (!mAttributeDict.ContainsKey(id))
-                        mAttributeDict[id] = attr;
-                }
-
-                ReflectionUtil.TrySetPrivateField(__instance, "mAttributeDict", mAttributeDict);
-                __result = mAttributeDict[nAttributeID].Icon;
-                return false;
+                if (!___mAttributeDict.ContainsKey(id))
+                    ___mAttributeDict[id] = attr;
             }
+
+            __result = ___mAttributeDict[nAttributeID].Icon;
+            return false;
         }
         return true;
     }
     
     [HarmonyPatch(typeof(BuffModel), "GetAttributeConf")]
     [HarmonyPrefix]
-    static bool GetAttributeConfPrefix(BuffModel __instance, int nAttrID, ref cfg.Attribute __result)
+    static bool GetAttributeConfPrefix(BuffModel __instance, int nAttrID, ref Dictionary<int, cfg.Attribute> ___mAttributeDict, ref cfg.Attribute __result)
     {
-        if (ReflectionUtil.TryGetPrivateField<Dictionary<int, cfg.Attribute>>(__instance, "mAttributeDict", out var mAttributeDict))
+        if (___mAttributeDict == null)
         {
-            if (mAttributeDict == null)
+            ___mAttributeDict = DataManager.GetVOData<tbattribute>().DataMap;
+
+            foreach(var (id, attr) in GlobalRegister.EnumerateRegistered<cfg.Attribute>())
             {
-                mAttributeDict = DataManager.GetVOData<tbattribute>().DataMap;
-
-                foreach(var (id, attr) in GlobalRegister.EnumerateRegistered<cfg.Attribute>())
-                {
-                    if (!mAttributeDict.ContainsKey(id))
-                        mAttributeDict[id] = attr;
-                }
-
-                ReflectionUtil.TrySetPrivateField(__instance, "mAttributeDict", mAttributeDict);
-                __result = mAttributeDict[nAttrID];
-                return false;
+                if (!___mAttributeDict.ContainsKey(id))
+                    ___mAttributeDict[id] = attr;
             }
+
+            __result = ___mAttributeDict[nAttrID];
+            return false;
         }
         return true;
     }

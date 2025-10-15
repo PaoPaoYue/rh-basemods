@@ -17,7 +17,6 @@ static class LotteCellPatch
         {
             if (instruction.LoadsField(AccessTools.Field(typeof(LotteCell), "objAttr")))
             {
-                yield return new CodeInstruction(OpCodes.Ldarg_0);
                 yield return new CodeInstruction(OpCodes.Ldloc_0);
                 yield return Transpilers.EmitDelegate(UpdateAttributePatch);
                 yield return new CodeInstruction(OpCodes.Ldarg_0);

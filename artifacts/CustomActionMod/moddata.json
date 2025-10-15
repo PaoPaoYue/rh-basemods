@@ -1,5 +1,5 @@
 {
-  "ModName": "CustomTriggerMod",
-  "ModDesc": "Add BattleCry trigger",
+  "ModName": "CustomActionMod",
+  "ModDesc": "Add Custom action to an element",
   "Version": "1.0.0"
 }

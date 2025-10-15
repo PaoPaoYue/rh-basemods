@@ -9,9 +9,9 @@ class RelicEntityPatch
 {
     [HarmonyPatch(typeof(RelicEntity), "Binding")]
     [HarmonyPostfix]
-    static void BindingPostfix(RelicEntity __instance, bool __mBinding)
+    static void BindingPostfix(RelicEntity __instance, bool ___mBinding)
     {
-        if (!__mBinding)
+        if (!___mBinding)
             return;
         var triggerType = Singleton<Model>.Instance.Relic.GetRelicsConf(__instance.ID).TriggerType;
         if (ModRegister.IsGlobalId(triggerType))
@@ -31,9 +31,9 @@ class RelicEntityPatch
 
     [HarmonyPatch(typeof(RelicEntity), "Unbinding")]
     [HarmonyPrefix]
-    static void UnbindingPrefix(RelicEntity __instance, bool __mBinding)
+    static void UnbindingPrefix(RelicEntity __instance, bool ___mBinding)
     {
-        if (!__mBinding)
+        if (!___mBinding)
             return;
         var triggerType = Singleton<Model>.Instance.Relic.GetRelicsConf(__instance.ID).TriggerType;
         if (ModRegister.IsGlobalId(triggerType))

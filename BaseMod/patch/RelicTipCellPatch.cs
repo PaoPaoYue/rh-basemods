@@ -9,23 +9,19 @@ namespace BaseMod;
 static class RelicTipCellPatch
 {
 
-    [HarmonyPatch(typeof(RelicTipCell), "show")]
+    [HarmonyPatch(typeof(RelicTipCell), "Show")]
     [HarmonyPostfix]
-    static void ShowPostfix(ref RelicTipCell __instance, Relics rRelicConf)
+    static void ShowPostfix(ref RelicTipCell __instance, Relics rRelicConf, TextMeshProUGUI ___txRelicOtherTipTitle, TextMeshProUGUI ___txRelicOtherTipDesc, GameObject ___objRelicOtherTip)
     {
-        if (ReflectionUtil.TryGetPrivateField<GameObject>(__instance, "objRelicOtherTip", out var objRelicOtherTipField))
+        if (___objRelicOtherTip != null)
         {            
             foreach (var tip in rRelicConf.DescTip)
             {
                 if (ModRegister.IsGlobalId((int)tip) && GlobalRegister.TryGetRegistered<DescTip>((int)tip, out var descTip))
                 {
-                    if (ReflectionUtil.TryGetPrivateField<TextMeshProUGUI>(__instance, "txRelicOtherTipTitle", out var txRelicOtherTipTitleField))
-                        txRelicOtherTipTitleField.text = Singleton<Model>.Instance.Localize.GetLocalize(descTip.Title);
-
-                    if (ReflectionUtil.TryGetPrivateField<TextMeshProUGUI>(__instance, "txRelicOtherTipDesc", out var txRelicOtherTipDescField))
-                        txRelicOtherTipDescField.text = Singleton<Model>.Instance.Localize.GetLocalize(descTip.Desc);
-
-                        objRelicOtherTipField.SetActive(true);
+                        ___txRelicOtherTipTitle.text = Singleton<Model>.Instance.Localize.GetLocalize(descTip.Title);
+                        ___txRelicOtherTipDesc.text = Singleton<Model>.Instance.Localize.GetLocalize(descTip.Desc);
+                        ___objRelicOtherTip.SetActive(true);
 
                     break;
                 }

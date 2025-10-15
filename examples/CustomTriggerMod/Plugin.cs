@@ -8,6 +8,7 @@ using System.Collections.Generic;
 namespace CustomTriggerMod;
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+[BepInDependency("BaseMod", BepInDependency.DependencyFlags.HardDependency)]
 public class Plugin : BaseUnityPlugin
 {
     public static readonly string ModName = "CustomTriggerMod";
@@ -25,34 +26,34 @@ public class Plugin : BaseUnityPlugin
         Register.RegisterElementTrigger(100001, new BattleCryTrigger(attrId));
     }
 
-}
-
-public enum ModAttribute
-{
-    HasDoneBattleCry = 100001
-}
-
-public class BattleCryTrigger : ElementTrigger
-{
-
-    private int mAttrId;
-    public BattleCryTrigger(int attrId) : base(EventName.OnLoopElementChange)
+    public enum ModAttribute
     {
-        mAttrId = attrId;
+        HasDoneBattleCry = 100001
     }
 
-    public override bool OnTrigger(Entity element, Element elementConf, EventArg rEventArg, out List<int> actionParams)
+    public class BattleCryTrigger : ElementTrigger
     {
-        actionParams = null; // no special params this case, or you can pass some params from rEventArg if needed
-        if (element.EntityType == EEntityType.Element)
+
+        private int mAttrId;
+        public BattleCryTrigger(int attrId) : base(EventName.OnLoopElementChange)
         {
-            var hasDoneBattleCry = element.GetAttribute(mAttrId);
-            if (hasDoneBattleCry == 0)
-            {
-                element.SetAttribute(mAttrId, 1); // Mark as done
-                return true;
-            }
+            mAttrId = attrId;
         }
-        return false;
+
+        public override bool OnTrigger(Entity element, Element elementConf, EventArg rEventArg, out List<int> actionParams)
+        {
+            actionParams = null; // no special params this case, or you can pass some params from rEventArg if needed
+            if (element.EntityType == EEntityType.Element)
+            {
+                var hasDoneBattleCry = element.GetAttribute(mAttrId);
+                if (hasDoneBattleCry == 0)
+                {
+                    element.SetAttribute(mAttrId, 1); // Mark as done
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }
+

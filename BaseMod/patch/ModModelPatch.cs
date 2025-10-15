@@ -22,9 +22,11 @@ static class ModModelPatch
         {
             if (instruction.StoresField(AccessTools.Field(typeof(ModModel), "ModElementConf")))
             {
+                yield return instruction;
                 yield return new CodeInstruction(OpCodes.Ldarg_0);
                 yield return Transpilers.EmitDelegate(LoadElementDataPatch);
                 found = true;
+                continue;
             }
             yield return instruction;
         }
@@ -34,10 +36,9 @@ static class ModModelPatch
     
     static void LoadElementDataPatch(ModModel __instance)
     {
-        if (!ReflectionUtil.TryGetPrivateField(__instance.ModElementConf, "_dataMap", out Dictionary<int, Element> dataMap) ||
-            !ReflectionUtil.TryGetPrivateField(__instance.ModElementConf, "_dataList", out List<Element> dataList))
+        if (__instance.ModElementConf.DataMap == null || __instance.ModElementConf.DataList == null)
         {
-            Plugin.Logger.LogError("Failed to patch ModModel.LoadElementData, fields _dataMap or _dataList not found!");
+            Plugin.Logger.LogError("Failed to patch ModModel.LoadElementData, fields DataMap or DataList not found!");
             return;
         }
 
@@ -48,14 +49,14 @@ static class ModModelPatch
             return;
         }
 
-        foreach (KeyValuePair<int, Element> entry in dataMap)
+        foreach (KeyValuePair<int, Element> entry in __instance.ModElementConf.DataMap)
         {
             var element = entry.Value;
             OverwriteElement(modName, element);
         }
-        foreach (Element element in dataList)
+        foreach (Element element in __instance.ModElementConf.DataList)
         {
-            OverwriteElement(modName,element);
+            OverwriteElement(modName, element);
         }
     }
 
@@ -63,10 +64,12 @@ static class ModModelPatch
     {
         if (ModRegister.IsValidModId(element.TriggerType) && GlobalRegister.TryGetGlobalId<ElementTrigger>(modName, element.TriggerType, out int triggerGlobalId))
         {
+            Plugin.Logger.LogInfo($"Overwrite Element {element.Id} TriggerType from {element.TriggerType} to {triggerGlobalId}");
             ReflectionUtil.TrySetReadonlyField(element, "TriggerType", triggerGlobalId);
         }
         if (ModRegister.IsValidModId(element.TriggerAction) && GlobalRegister.TryGetGlobalId<IEventAction>(modName, element.TriggerAction, out int actionGlobalId))
         {
+            Plugin.Logger.LogInfo($"Overwrite Element {element.Id} TriggerAction from {element.TriggerAction} to {actionGlobalId}");
             ReflectionUtil.TrySetReadonlyField(element, "TriggerAction", actionGlobalId);
         }
 
@@ -77,6 +80,7 @@ static class ModModelPatch
             var tip = (int)desctipCopy[i];
             if (ModRegister.IsValidModId(tip) && GlobalRegister.TryGetGlobalId<DescTip>(modName, tip, out int descTipGlobalId))
             {
+                Plugin.Logger.LogInfo($"Overwrite Element {element.Id} Desctip from {tip} to {descTipGlobalId}");
                 desctipCopy[i] = (Etip)descTipGlobalId;
                 changed = true;
             }
@@ -94,9 +98,11 @@ static class ModModelPatch
         {
             if (instruction.StoresField(AccessTools.Field(typeof(ModModel), "ModRelicConf")))
             {
+                yield return instruction;
                 yield return new CodeInstruction(OpCodes.Ldarg_0);
                 yield return Transpilers.EmitDelegate(LoadRelicDataPatch);
                 found = true;
+                continue;
             }
             yield return instruction;
         }
@@ -106,10 +112,9 @@ static class ModModelPatch
 
     static void LoadRelicDataPatch(ModModel __instance)
     {
-        if (!ReflectionUtil.TryGetPrivateField(__instance.ModRelicConf, "_dataMap", out Dictionary<int, Relics> dataMap) ||
-            !ReflectionUtil.TryGetPrivateField(__instance.ModRelicConf, "_dataList", out List<Relics> dataList))
+        if (__instance.ModRelicConf.DataMap == null || __instance.ModRelicConf.DataList == null)
         {
-            Plugin.Logger.LogError("Failed to patch ModModel.LoadRelicData, fields _dataMap or _dataList not found!");
+            Plugin.Logger.LogError("Failed to patch ModModel.LoadRelicData, fields DataMap or DataList not found!");
             return;
         }
 
@@ -120,12 +125,12 @@ static class ModModelPatch
             return;
         }
 
-        foreach (KeyValuePair<int, Relics> entry in dataMap)
+        foreach (KeyValuePair<int, Relics> entry in __instance.ModRelicConf.DataMap)
         {
             var relic = entry.Value;
             OverwriteRelic(modName, relic);
         }
-        foreach (Relics relic in dataList)
+        foreach (Relics relic in __instance.ModRelicConf.DataList)
         {
             OverwriteRelic(modName, relic);
         }
@@ -135,10 +140,12 @@ static class ModModelPatch
     {
         if (ModRegister.IsValidModId(relic.TriggerType) && GlobalRegister.TryGetGlobalId<RelicTrigger>(modName, relic.TriggerType, out int triggerGlobalId))
         {
+            Plugin.Logger.LogInfo($"Overwrite Relic {relic.Id} TriggerType from {relic.TriggerType} to {triggerGlobalId}");
             ReflectionUtil.TrySetReadonlyField(relic, "TriggerType", triggerGlobalId);
         }
         if (ModRegister.IsValidModId(relic.TriggerAction) && GlobalRegister.TryGetGlobalId<IEventAction>(modName, relic.TriggerAction, out int actionGlobalId))
         {
+            Plugin.Logger.LogInfo($"Overwrite Relic {relic.Id} TriggerAction from {relic.TriggerAction} to {actionGlobalId}");
             ReflectionUtil.TrySetReadonlyField(relic, "TriggerAction", actionGlobalId);
         }
 
@@ -149,6 +156,7 @@ static class ModModelPatch
             var tip = (int)descTipCopy[i];
             if (ModRegister.IsValidModId(tip) && GlobalRegister.TryGetGlobalId<DescTip>(modName, tip, out int descTipGlobalId))
             {
+                Plugin.Logger.LogInfo($"Overwrite Relic {relic.Id} DescTip from {tip} to {descTipGlobalId}");
                 descTipCopy[i] = (Etip)descTipGlobalId;
                 changed = true;
             }
