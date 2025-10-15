@@ -2,10 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Game;
-using cfg;
 
 namespace BaseMod;
-
 
 public class ModRegister
 {
@@ -56,9 +54,9 @@ public class ModRegister
 
     private Dictionary<string, int> nameToEventDict = []; // name -> eventId
     private int eventCounter = 1;
-    private Dictionary<string, int> entityAttributeDict = []; // name -> attrId
+    private Dictionary<int, int> entityAttributeDict = []; // name -> attrId
     private int entityAttributeCounter = 1;
-    
+
     private ModRegister(string modName, List<ModRegister> superRegisters = null)
     {
         ModName = modName;
@@ -108,36 +106,36 @@ public class ModRegister
         nameToEventDict[name] = eventId;
     }
 
-    public int RegisterEntityAttribute(string name)
+    public int RegisterEntityAttribute(int id)
     {
-        if (entityAttributeDict.ContainsKey(name))
+        if (entityAttributeDict.ContainsKey(id))
         {
-            throw new Exception($"Entity attribute name {name} already registered in mod {ModName}!");
+            throw new Exception($"Entity attribute id {id} already registered in mod {ModName}!");
         }
         var attrId = ConvertToGlobalId(entityAttributeCounter++);
-        entityAttributeDict[name] = attrId;
+        entityAttributeDict[id] = attrId;
         return attrId;
     }
 
-    public int RegisterVisableAttribute(string name, string icon, int type) // type: 0 int, 1 percent
+    public int RegisterVisableAttribute(int id, string icon, int type) // type: 0 int, 1 percent
     {
-        if (entityAttributeDict.ContainsKey(name))
+        if (entityAttributeDict.ContainsKey(id))
         {
-            throw new Exception($"Entity attribute name {name} already registered in mod {ModName}!");
+            throw new Exception($"Entity attribute id {id} already registered in mod {ModName}!");
         }
         var attrId = ConvertToGlobalId(entityAttributeCounter++);
-        entityAttributeDict[name] = attrId;
+        entityAttributeDict[id] = attrId;
 
         cfg.Attribute attr = new();
         ReflectionUtil.TrySetReadonlyField(attr, "Id", attrId);
-        ReflectionUtil.TrySetReadonlyField(attr, "NameID", attrId);
+        ReflectionUtil.TrySetReadonlyField(attr, "NameID", id);
         ReflectionUtil.TrySetReadonlyField(attr, "Icon", icon);
         ReflectionUtil.TrySetReadonlyField(attr, "AttributeType", type);
 
         GlobalRegister.AddRegistered(this, attrId, attr);
         return attrId;
 
-    }   
+    }
 
     public void RegisterDescTip(int id, DescTip descTip)
     {
@@ -217,15 +215,15 @@ public class ModRegister
         return -1;
     }
 
-    public int GetEntityAttributeId(string name)
+    public int GetEntityAttributeId(int id)
     {
-        if (entityAttributeDict.ContainsKey(name))
+        if (entityAttributeDict.ContainsKey(id))
         {
-            return entityAttributeDict[name];
+            return entityAttributeDict[id];
         }
         foreach (var super in superRegisters)
         {
-            var attrId = super.GetEntityAttributeId(name);
+            var attrId = super.GetEntityAttributeId(id);
             if (attrId != -1)
             {
                 return attrId;
@@ -254,7 +252,7 @@ public class ModRegister
 
     internal int ConvertToGlobalId(int id)
     {
-         return (ModIndex + 1) * (ModMaxId + 1) + id;
+        return (ModIndex + 1) * (ModMaxId + 1) + id;
     }
 
 }

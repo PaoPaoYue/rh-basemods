@@ -27,6 +27,16 @@ namespace ModDllPreloader
             {
                 Logger.LogInfo("Starting Mod DLL Preloader...");
                 var dlls = ScanMods();
+                if (dlls.Count == 0)
+                {
+                    Logger.LogInfo("No mod DLLs found, skipping.");
+                    return;
+                }
+                if (dlls.Count > 200)
+                {
+                    Logger.LogError($"Too many DLLs found ({dlls.Count}), consider reducing the number of mods.");
+                    return;
+                }
                 Logger.LogInfo($"Scan complete. Start importing {dlls.Count} DLLs.");
                 Deploy(dlls);
                 Logger.LogInfo($"Completed. Imported {dlls.Count} DLLs.");

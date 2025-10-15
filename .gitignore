@@ -32,3 +32,4 @@ msbuild.wrn
 
 # libraries
 libs/**.dll
+examples/libs/**.dll
