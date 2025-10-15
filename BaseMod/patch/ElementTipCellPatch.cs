@@ -6,12 +6,12 @@ using UnityEngine;
 
 namespace BaseMod;
 
-static class ModElementTipCellPatch
+static class ElementTipCellPatch
 {
 
-    [HarmonyPatch(typeof(ModElementTipCell), "Show")]
+    [HarmonyPatch(typeof(ElementTipCell), "Show")]
     [HarmonyPostfix]
-    static void ShowPostfix(ref ModElementTipCell __instance, TextMeshProUGUI ___txElementOtherTipTitle, TextMeshProUGUI ___txElementOtherTipDesc, GameObject ___objElementOtherTip)
+    static void ShowPostfix(ref ElementTipCell __instance, TextMeshProUGUI ___txElementOtherTipTitle, TextMeshProUGUI ___txElementOtherTipDesc, GameObject ___objElementOtherTip)
     {
         Element tipConf = Singleton<Model>.Instance.Element.TipConf;
         foreach (var tip in tipConf.Desctip)

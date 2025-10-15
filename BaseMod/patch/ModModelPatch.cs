@@ -64,13 +64,13 @@ static class ModModelPatch
     {
         if (ModRegister.IsValidModId(element.TriggerType) && GlobalRegister.TryGetGlobalId<ElementTrigger>(modName, element.TriggerType, out int triggerGlobalId))
         {
-            Plugin.Logger.LogInfo($"Overwrite Element {element.Id} TriggerType from {element.TriggerType} to {triggerGlobalId}");
             ReflectionUtil.TrySetReadonlyField(element, "TriggerType", triggerGlobalId);
+            Plugin.Logger.LogDebug($"Overwrite Element {element.Id} TriggerType from {element.TriggerType} to {triggerGlobalId}");
         }
         if (ModRegister.IsValidModId(element.TriggerAction) && GlobalRegister.TryGetGlobalId<IEventAction>(modName, element.TriggerAction, out int actionGlobalId))
         {
-            Plugin.Logger.LogInfo($"Overwrite Element {element.Id} TriggerAction from {element.TriggerAction} to {actionGlobalId}");
             ReflectionUtil.TrySetReadonlyField(element, "TriggerAction", actionGlobalId);
+            Plugin.Logger.LogDebug($"Overwrite Element {element.Id} TriggerAction from {element.TriggerAction} to {actionGlobalId}");
         }
 
         bool changed = false;
@@ -80,8 +80,8 @@ static class ModModelPatch
             var tip = (int)desctipCopy[i];
             if (ModRegister.IsValidModId(tip) && GlobalRegister.TryGetGlobalId<DescTip>(modName, tip, out int descTipGlobalId))
             {
-                Plugin.Logger.LogInfo($"Overwrite Element {element.Id} Desctip from {tip} to {descTipGlobalId}");
                 desctipCopy[i] = (Etip)descTipGlobalId;
+                Plugin.Logger.LogDebug($"Overwrite Element {element.Id} Desctip from {tip} to {descTipGlobalId}");
                 changed = true;
             }
         }
@@ -140,13 +140,13 @@ static class ModModelPatch
     {
         if (ModRegister.IsValidModId(relic.TriggerType) && GlobalRegister.TryGetGlobalId<RelicTrigger>(modName, relic.TriggerType, out int triggerGlobalId))
         {
-            Plugin.Logger.LogInfo($"Overwrite Relic {relic.Id} TriggerType from {relic.TriggerType} to {triggerGlobalId}");
             ReflectionUtil.TrySetReadonlyField(relic, "TriggerType", triggerGlobalId);
+            Plugin.Logger.LogDebug($"Overwrite Relic {relic.Id} TriggerType from {relic.TriggerType} to {triggerGlobalId}");
         }
         if (ModRegister.IsValidModId(relic.TriggerAction) && GlobalRegister.TryGetGlobalId<IEventAction>(modName, relic.TriggerAction, out int actionGlobalId))
         {
-            Plugin.Logger.LogInfo($"Overwrite Relic {relic.Id} TriggerAction from {relic.TriggerAction} to {actionGlobalId}");
             ReflectionUtil.TrySetReadonlyField(relic, "TriggerAction", actionGlobalId);
+            Plugin.Logger.LogDebug($"Overwrite Relic {relic.Id} TriggerAction from {relic.TriggerAction} to {actionGlobalId}");
         }
 
         bool changed = false;
@@ -156,8 +156,8 @@ static class ModModelPatch
             var tip = (int)descTipCopy[i];
             if (ModRegister.IsValidModId(tip) && GlobalRegister.TryGetGlobalId<DescTip>(modName, tip, out int descTipGlobalId))
             {
-                Plugin.Logger.LogInfo($"Overwrite Relic {relic.Id} DescTip from {tip} to {descTipGlobalId}");
                 descTipCopy[i] = (Etip)descTipGlobalId;
+                Plugin.Logger.LogDebug($"Overwrite Relic {relic.Id} DescTip from {tip} to {descTipGlobalId}");
                 changed = true;
             }
         }
@@ -209,6 +209,7 @@ static class ModModelPatch
                 var rIconName = Path.GetFileNameWithoutExtension(file);
                 ReflectionUtil.TryInvokePrivateMethod(__instance, "LoadImage", [extraImageDir, rIconName]);
                 await UniTask.WaitForSeconds(0.05f);
+                Plugin.Logger.LogDebug($"Loaded extra image {rIconName} from {file}");
             }
         }
         return true;
@@ -396,6 +397,7 @@ static class ModModelPatch
                         }
                     }
                     await UniTask.WaitForSeconds(0.05f);
+                    Plugin.Logger.LogDebug($"Loaded extra sound {nSoundID} from {file}");
                 }
             }
         }

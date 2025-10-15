@@ -22,13 +22,9 @@ public class Plugin : BaseUnityPlugin
         Logger = base.Logger;
         Register = ModRegister.Create(ModName);
 
-        var attrId = Register.RegisterEntityAttribute((int)ModAttribute.HasDoneBattleCry);
+        Register.RegisterDescTip(100001, new DescTip(1000001, 1000002));
+        var attrId = Register.RegisterVisableAttribute(100001, "hasDoneBattleCry");
         Register.RegisterElementTrigger(100001, new BattleCryTrigger(attrId));
-    }
-
-    public enum ModAttribute
-    {
-        HasDoneBattleCry = 100001
     }
 
     public class BattleCryTrigger : ElementTrigger
@@ -48,7 +44,7 @@ public class Plugin : BaseUnityPlugin
                 var hasDoneBattleCry = element.GetAttribute(mAttrId);
                 if (hasDoneBattleCry == 0)
                 {
-                    element.SetAttribute(mAttrId, 1); // Mark as done
+                    element.SetAttribute(mAttrId, 1, true); // Mark as done
                     return true;
                 }
             }

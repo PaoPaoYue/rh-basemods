@@ -12,3 +12,4 @@
 2. 安装[bepinex](https://docs.bepinex.dev/articles/user_guide/installation/index.html)
 3. 将`artifacts/ModDLLPreloader.dll`复制到游戏目录下的`BepInEx\patchers`文件夹
 4. 将所有`artifacts/xxxMod`复制到游戏目录下的`Mod\ModDebug`文件夹
+5. 开始游戏

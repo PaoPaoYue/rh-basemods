@@ -12,27 +12,26 @@ static class LotteCellPatch
     [HarmonyTranspiler]
     static IEnumerable<CodeInstruction> UpdateAttributeTranspiler(IEnumerable<CodeInstruction> instructions)
     {
-        var found = false;
-        foreach (var instruction in instructions)
-        {
-            if (instruction.LoadsField(AccessTools.Field(typeof(LotteCell), "objAttr")))
-            {
-                yield return new CodeInstruction(OpCodes.Ldloc_0);
-                yield return Transpilers.EmitDelegate(UpdateAttributePatch);
-                yield return new CodeInstruction(OpCodes.Ldarg_0);
-                found = true;
-            }
-            yield return instruction;
-        }
-        if (found is false)
-            Plugin.Logger.LogError("Failed to patch LotteCell.UpdateAttribute, field ModElementConf not found!");
+        return new CodeMatcher(instructions)
+            .MatchForward(false,
+                new CodeMatch(OpCodes.Ldarg_0),
+                new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(LotteCell), "objAttr")),
+                new CodeMatch(OpCodes.Ldarg_0),
+                new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(LotteCell), "mAttrIndex"))
+            )
+            .InsertAndAdvance(
+                new CodeInstruction(OpCodes.Ldarg_0), // load LotteCell instance
+                new CodeInstruction(OpCodes.Ldloc_0), // load ElementEntity argument
+                Transpilers.EmitDelegate(UpdateAttributePatch)
+            )
+            .InstructionEnumeration();
     }
 
     static void UpdateAttributePatch(LotteCell __instance, ElementEntity elementData)
     {
         foreach(var (id, attr) in GlobalRegister.EnumerateRegistered<cfg.Attribute>())
         {
-            ReflectionUtil.TryInvokePrivateMethod(__instance, "UpdateAttributeIcon", [elementData, id]);
+            ReflectionUtil.TryInvokePrivateMethod(__instance, "AddAttribute", [elementData, id]);
         }
     }
 }

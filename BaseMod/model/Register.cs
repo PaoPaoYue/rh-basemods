@@ -73,7 +73,7 @@ public class ModRegister
             throw new Exception($"Event action with id {id} already registered in mod {ModName}!");
         }
         eventActionDict[id] = action;
-        GlobalRegister.AddRegistered(this, id, action);
+        GlobalRegister.AddRegistered(ConvertToGlobalId(id), action);
     }
 
     public void RegisterElementTrigger(int id, ElementTrigger trigger)
@@ -83,7 +83,7 @@ public class ModRegister
             throw new Exception($"Element trigger with id {id} already registered in mod {ModName}!");
         }
         elementTriggerDict[id] = trigger;
-        GlobalRegister.AddRegistered(this, id, trigger);
+        GlobalRegister.AddRegistered(ConvertToGlobalId(id), trigger);
     }
 
     public void RegisterRelicTrigger(int id, RelicTrigger trigger)
@@ -93,7 +93,7 @@ public class ModRegister
             throw new Exception($"Relic trigger with id {id} already registered in mod {ModName}!");
         }
         relicTriggerDict[id] = trigger;
-        GlobalRegister.AddRegistered(this, id, trigger);
+        GlobalRegister.AddRegistered(ConvertToGlobalId(id), trigger);
     }
 
     public void RegisterEvent(string name)
@@ -117,7 +117,7 @@ public class ModRegister
         return attrId;
     }
 
-    public int RegisterVisableAttribute(int id, string icon, int type) // type: 0 int, 1 percent
+    public int RegisterVisableAttribute(int id, string icon, int type = 0) // type: 0 int, 1 percent
     {
         if (entityAttributeDict.ContainsKey(id))
         {
@@ -132,7 +132,7 @@ public class ModRegister
         ReflectionUtil.TrySetReadonlyField(attr, "Icon", icon);
         ReflectionUtil.TrySetReadonlyField(attr, "AttributeType", type);
 
-        GlobalRegister.AddRegistered(this, attrId, attr);
+        GlobalRegister.AddRegistered(attrId, attr);
         return attrId;
 
     }
@@ -144,7 +144,7 @@ public class ModRegister
             throw new Exception($"DescTip with id {id} already registered in mod {ModName}!");
         }
         descTipDict[id] = descTip;
-        GlobalRegister.AddRegistered(this, id, descTip);
+        GlobalRegister.AddRegistered(ConvertToGlobalId(id), descTip);
     }
 
     public IEventAction GetEventAction(int id)
@@ -282,9 +282,8 @@ internal static class GlobalRegister
         return modRegisters.Count - 1;
     }
 
-    internal static void AddRegistered<T>(ModRegister modRegister, int id, T value)
+    internal static void AddRegistered<T>(int globalId, T value)
     {
-        var globalId = modRegister.ConvertToGlobalId(id);
         var type = typeof(T);
         var key = (type, globalId);
         globalRegisterDict[key] = value;

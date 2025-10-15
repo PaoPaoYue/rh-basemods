@@ -15,8 +15,8 @@ public class Plugin : BaseUnityPlugin
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(BattleOrderManagerPatch));
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(BuffModelPatch));
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(ElementEntityPatch));
+        HarmonyLib.Harmony.CreateAndPatchAll(typeof(ElementTipCellPatch));
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(LotteCellPatch));
-        HarmonyLib.Harmony.CreateAndPatchAll(typeof(ModElementTipCellPatch));
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(ModModelPatch));
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(RelicEntityPatch));
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(RelicTipCellPatch));
