@@ -3,3 +3,4 @@ Please copy the following DLLs from `<Your Game Folder>\RouletteHero_Data\Manage
 2. `com.rlabrecque.steamworks.net.dll`
 3. `UniTask.dll`
 4. `Unity.TextMeshPro.dll`
+5. `UnityEngine.UI.dll`
