@@ -30,10 +30,10 @@ public class Plugin : BaseUnityPlugin
     public class BattleCryTrigger : ElementTrigger
     {
 
-        private int mAttrId;
+        private int attrId;
         public BattleCryTrigger(int attrId) : base(EventName.OnLoopElementChange)
         {
-            mAttrId = attrId;
+            this.attrId = attrId;
         }
 
         public override bool OnTrigger(Entity element, Element elementConf, EventArg rEventArg, out List<int> actionParams)
@@ -41,10 +41,10 @@ public class Plugin : BaseUnityPlugin
             actionParams = null; // no special params this case, or you can pass some params from rEventArg if needed
             if (element.EntityType == EEntityType.Element)
             {
-                var hasDoneBattleCry = element.GetAttribute(mAttrId);
+                var hasDoneBattleCry = element.GetAttribute(attrId);
                 if (hasDoneBattleCry == 0)
                 {
-                    element.SetAttribute(mAttrId, 1, true); // Mark as done
+                    element.SetAttribute(attrId, 1, true); // Mark as done
                     return true;
                 }
             }
