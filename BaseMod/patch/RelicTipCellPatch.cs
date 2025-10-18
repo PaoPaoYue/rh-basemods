@@ -19,9 +19,9 @@ static class RelicTipCellPatch
             {
                 if (ModRegister.IsGlobalId((int)tip) && GlobalRegister.TryGetRegistered<DescTip>((int)tip, out var descTip))
                 {
-                        ___txRelicOtherTipTitle.text = Singleton<Model>.Instance.Localize.GetLocalize(descTip.Title);
-                        ___txRelicOtherTipDesc.text = Singleton<Model>.Instance.Localize.GetLocalize(descTip.Desc);
-                        ___objRelicOtherTip.SetActive(true);
+                    ___txRelicOtherTipTitle.text = Singleton<Model>.Instance.Localize.GetLocalize(descTip.Title);
+                    ___txRelicOtherTipDesc.text = Singleton<Model>.Instance.Localize.GetLocalize(descTip.Desc);
+                    ___objRelicOtherTip.SetActive(true);
 
                     break;
                 }

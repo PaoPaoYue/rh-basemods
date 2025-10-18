@@ -28,6 +28,14 @@
       <HintPath>../libs/BaseMod.dll</HintPath>
       <Private>false</Private>
     </Reference>
+
+    <!-- 将 PNG 文件嵌入 DLL -->
+    <EmbeddedResource Include="assets\**\*.png" />
+
+    <!-- 将 WAV/OGG/MP3 文件嵌入 DLL -->
+    <!-- <EmbeddedResource Include="assets\**\*.wav" /> -->
+    <!-- <EmbeddedResource Include="assets\**\*.ogg" /> -->
+    <EmbeddedResource Include="assets\**\*.mp3" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">

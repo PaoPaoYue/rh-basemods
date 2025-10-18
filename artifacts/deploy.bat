@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 :: Set target directory
-set "TARGET_DIR=C:\Users\LENOVO\Desktop\rhmod\RouletteHero_ForMod\Mod\ModDebug"
+set "TARGET_DIR=F:\Steam Games\steamapps\common\RouletteHero\Mod\ModDebug"
 set "SOURCE_DIR=%cd%"
 
 echo SOURCE_DIR=%SOURCE_DIR%

@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using cfg;
 using Game;
+using Cysharp.Threading.Tasks;
 
 namespace BaseMod;
 
@@ -38,6 +41,9 @@ public class ModRegister
 
         var modRegister = new ModRegister(modName, superMods);
         modRegister.ModIndex = GlobalRegister.AddModRegister(modName, modRegister);
+
+        ResourceScanner.ScanAssemblyResourcesAsync(Assembly.GetCallingAssembly()).Forget();
+
         return modRegister;
     }
 
@@ -50,6 +56,7 @@ public class ModRegister
     private Dictionary<int, IEventAction> eventActionDict = []; // id -> action
     private Dictionary<int, ElementTrigger> elementTriggerDict = []; // id -> (eventId, trigger)
     private Dictionary<int, RelicTrigger> relicTriggerDict = []; // id -> (eventId, trigger)
+    private Dictionary<int, Localization> localizationDict = []; // id -> localization
     private Dictionary<int, DescTip> descTipDict = []; // id -> descTip
 
     private Dictionary<string, int> nameToEventDict = []; // name -> eventId
@@ -106,6 +113,53 @@ public class ModRegister
         nameToEventDict[name] = eventId;
     }
 
+    public int GetEventId(string name)
+    {
+        if (nameToEventDict.ContainsKey(name))
+        {
+            return nameToEventDict[name];
+        }
+        foreach (var super in superRegisters)
+        {
+            var eventId = super.GetEventId(name);
+            if (eventId != -1)
+            {
+                return eventId;
+            }
+        }
+        return -1;
+    }
+
+    public int RegisterLocalization(int id, string CN = null, string EN = null, string JP = null, string CNT = null)
+    {
+        if (localizationDict.ContainsKey(id))
+        {
+            throw new Exception($"Localization with id {id} already registered in mod {ModName}!");
+        }
+        var locId = ConvertToGlobalId(id);
+        var loc = ReflectionUtil.CreateReadonly<Localization>(locId, CN, EN, JP, CNT);
+        localizationDict[id] = loc;
+        GlobalRegister.AddRegistered(locId, loc);
+        return locId;
+    }
+
+    public int GetLocalizationId(int id)
+    {
+        if (localizationDict.ContainsKey(id))
+        {
+            return ConvertToGlobalId(id);
+        }
+        foreach (var super in superRegisters)
+        {
+            var locId = super.GetLocalizationId(id);
+            if (locId != -1)
+            {
+                return locId;
+            }
+        }
+        return -1;
+    }
+
     public int RegisterEntityAttribute(int id)
     {
         if (entityAttributeDict.ContainsKey(id))
@@ -126,93 +180,10 @@ public class ModRegister
         var attrId = ConvertToGlobalId(entityAttributeCounter++);
         entityAttributeDict[id] = attrId;
 
-        cfg.Attribute attr = new();
-        ReflectionUtil.TrySetReadonlyField(attr, "Id", attrId);
-        ReflectionUtil.TrySetReadonlyField(attr, "NameID", id);
-        ReflectionUtil.TrySetReadonlyField(attr, "Icon", icon);
-        ReflectionUtil.TrySetReadonlyField(attr, "AttributeType", type);
+        cfg.Attribute attr = ReflectionUtil.CreateReadonly<cfg.Attribute>(attrId, id, icon, type);
 
         GlobalRegister.AddRegistered(attrId, attr);
         return attrId;
-
-    }
-
-    public void RegisterDescTip(int id, DescTip descTip)
-    {
-        if (descTipDict.ContainsKey(id))
-        {
-            throw new Exception($"DescTip with id {id} already registered in mod {ModName}!");
-        }
-        descTipDict[id] = descTip;
-        GlobalRegister.AddRegistered(ConvertToGlobalId(id), descTip);
-    }
-
-    public IEventAction GetEventAction(int id)
-    {
-        if (eventActionDict.ContainsKey(id))
-        {
-            return eventActionDict[id];
-        }
-        foreach (var super in superRegisters)
-        {
-            var action = super.GetEventAction(id);
-            if (action != null)
-            {
-                return action;
-            }
-        }
-        return null;
-    }
-
-    public ElementTrigger GetElementTrigger(int id)
-    {
-        if (elementTriggerDict.ContainsKey(id))
-        {
-            return elementTriggerDict[id];
-        }
-        foreach (var super in superRegisters)
-        {
-            var trigger = super.GetElementTrigger(id);
-            if (trigger != default)
-            {
-                return trigger;
-            }
-        }
-        return default;
-    }
-
-    public RelicTrigger GetRelicTrigger(int id)
-    {
-        if (relicTriggerDict.ContainsKey(id))
-        {
-            return relicTriggerDict[id];
-        }
-        foreach (var super in superRegisters)
-        {
-            var trigger = super.GetRelicTrigger(id);
-            if (trigger != default)
-            {
-                return trigger;
-            }
-        }
-        return default;
-    }
-
-    public int GetEventId(string name)
-    {
-        if (nameToEventDict.ContainsKey(name))
-        {
-            return nameToEventDict[name];
-        }
-        foreach (var super in superRegisters)
-        {
-            var eventId = super.GetEventId(name);
-            if (eventId != -1)
-            {
-                return eventId;
-            }
-        }
-        return -1;
     }
 
     public int GetEntityAttributeId(int id)
@@ -232,23 +203,15 @@ public class ModRegister
         return -1;
     }
 
-    public DescTip GetDescTip(int id)
+    public void RegisterDescTip(int id, DescTip descTip)
     {
         if (descTipDict.ContainsKey(id))
         {
-            return descTipDict[id];
+            throw new Exception($"DescTip with id {id} already registered in mod {ModName}!");
         }
-        foreach (var super in superRegisters)
-        {
-            var descTip = super.GetDescTip(id);
-            if (descTip != null)
-            {
-                return descTip;
-            }
-        }
-        return null;
+        descTipDict[id] = descTip;
+        GlobalRegister.AddRegistered(ConvertToGlobalId(id), descTip);
     }
-
 
     internal int ConvertToGlobalId(int id)
     {
@@ -259,6 +222,7 @@ public class ModRegister
 
 internal static class GlobalRegister
 {
+
     private static Dictionary<string, ModRegister> modRegisters = new Dictionary<string, ModRegister>();
 
     private static Dictionary<(Type, int), object> globalRegisterDict = new Dictionary<(Type, int), object>(); // (type, globalId) -> object

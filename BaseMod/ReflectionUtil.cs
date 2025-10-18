@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 
 public static class ReflectionUtil
 {
+    private static readonly ConcurrentDictionary<Type, FieldInfo[]> _ctorCache = new();
     private static readonly ConcurrentDictionary<(Type, string), FieldInfo> _fieldCache = new();
     private static readonly ConcurrentDictionary<(Type, string), PropertyInfo> _propertyCache = new();
     private static readonly ConcurrentDictionary<(Type, string), MethodInfo> _methodCache = new();
@@ -19,6 +22,32 @@ public static class ReflectionUtil
         where T : class
     {
         return cache.GetOrAdd((type, name), key => resolver(key.Item1, key.Item2));
+    }
+
+    // ----------------------- Constructor -----------------
+
+    // Creates an instance of a class with readonly fields initialized to the provided values.
+    public static T CreateReadonly<T>(params object[] values) where T : class
+    {
+        var type = typeof(T);
+
+        var fields = _ctorCache.GetOrAdd(type, t =>
+            [.. t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+             .Where(f => f.IsInitOnly)
+             .OrderBy(f => f.MetadataToken)]
+        );
+
+        if (values.Length != fields.Length)
+            throw new ArgumentException($"Field count ({fields.Length}) does not match values count ({values.Length})");
+
+        var obj = (T)FormatterServices.GetUninitializedObject(type);
+
+        for (int i = 0; i < fields.Length; i++)
+        {
+            fields[i].SetValue(obj, values[i]);
+        }
+
+        return obj;
     }
 
     // ----------------------- Field -----------------------

@@ -165,245 +165,32 @@ static class ModModelPatch
             ReflectionUtil.TrySetReadonlyField(relic, "DescTip", descTipCopy);
     }
 
-
-    [HarmonyPatch(typeof(ModModel), "LoadModImage")]
-    [HarmonyPrefix]
-    static bool LoadModImagePrefix(ModModel __instance, string rPath, ref UniTask<bool> __result)
+    [HarmonyPatch(typeof(ModModel), "LoadLocalizationData")]
+    [HarmonyPostfix]
+    static void LoadLocalizationDataPostfix(ModModel __instance, string rPath)
     {
-        __result = LoadModImage(__instance, rPath);
-        return false;
-    }
-
-    static async UniTask<bool> LoadModImage(ModModel __instance, string rPath)
-    {
-        // 加载MOD图片
-        var rImageDir = rPath + "\\Image_Mod";
-        if (Directory.Exists(rImageDir))
+        foreach (var (id, value) in GlobalRegister.EnumerateRegistered<Localization>())
         {
-            foreach (var rPair in __instance.ModElementConf.DataMap)
-            {
-                var rIconName = rPair.Value.Icon;
-                ReflectionUtil.TryInvokePrivateMethod(__instance, "LoadImage", [rImageDir, rIconName]);
-                await UniTask.WaitForSeconds(0.05f);
-            }
-
-            foreach (var rPair in __instance.ModRaceConf.DataMap)
-            {
-                var rIconName = rPair.Value.Icon;
-                ReflectionUtil.TryInvokePrivateMethod(__instance, "LoadImage", [rImageDir, rIconName]);
-                await UniTask.WaitForSeconds(0.05f);
-            }
-        }
-        else
-        {
-            LogUtil.LogError("image not exist");
-            GameEventManager.Instance.Dispatch(EventName.OnModLoadFinish, Model.Instance.Localize.GetLocalize(182, "png"));
-            return false;
-        }
-        var extraImageDir = rPath + "\\Extra_Image_Mod";
-        if (Directory.Exists(extraImageDir))
-        {
-            // enumarate all png files in the Extra_Image_Mod folder and load them
-            foreach (var file in Directory.GetFiles(extraImageDir, "*.png", SearchOption.AllDirectories))
-            {
-                var rIconName = Path.GetFileNameWithoutExtension(file);
-                ReflectionUtil.TryInvokePrivateMethod(__instance, "LoadImage", [extraImageDir, rIconName]);
-                await UniTask.WaitForSeconds(0.05f);
-                Plugin.Logger.LogDebug($"Loaded extra image {rIconName} from {file}");
-            }
-        }
-        return true;
-    }
-
-    [HarmonyPatch(typeof(ModModel), "LoadModSound")]
-    [HarmonyPrefix]
-    static bool LoadModSoundPrefix(ModModel __instance, string rPath, ref UniTask __result)
-    {
-        __result = LoadModSound(__instance, rPath);
-        return false;
-    }
-
-
-    static async UniTask LoadModSound(ModModel __instance, string rPath)
-    {
-        // 加载MOD图片
-        var rSoundDir = rPath + "\\Sound_Mod";
-        if (Directory.Exists(rSoundDir))
-        {
-            var rSoundFiles = Directory.GetFiles(rSoundDir, "*.ogg");
-            if (rSoundFiles == null || rSoundFiles.Length == 0)
-            {
-                return;
-            }
-
-            if (__instance.ModElementConf != null)
-            {
-                foreach (var rPair in __instance.ModElementConf.DataMap)
-                {
-                    var nSoundID = rPair.Value.SelectSound;
-
-                    if (nSoundID != 0)
-                    {
-                        var rFileName = rSoundDir + "\\" + nSoundID + ".ogg";
-                        if (File.Exists(rFileName))
-                        {
-                            using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequestMultimedia.GetAudioClip(rFileName, AudioType.OGGVORBIS))
-                            {
-                                var asyncOp = www.SendWebRequest();
-
-                                var nWhileCount = 10000;
-
-                                while (!asyncOp.isDone && nWhileCount > 0)
-                                {
-                                    nWhileCount--;
-                                    await UniTask.Yield();
-                                }
-
-                                if (www.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
-                                {
-                                    AudioClip clip = UnityEngine.Networking.DownloadHandlerAudioClip.GetContent(www);
-                                    __instance.modAudio[nSoundID] = clip;
-                                }
-                            }
-                        }
-                        await UniTask.WaitForSeconds(0.05f);
-                    }
-
-                    nSoundID = rPair.Value.AttackSound;
-                    if (nSoundID != 0)
-                    {
-                        var rFileName = rSoundDir + "\\" + nSoundID + ".ogg";
-                        if (File.Exists(rFileName))
-                        {
-                            using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequestMultimedia.GetAudioClip(rFileName, AudioType.OGGVORBIS))
-                            {
-                                var asyncOp = www.SendWebRequest();
-
-                                var nWhileCount = 10000;
-
-                                while (!asyncOp.isDone && nWhileCount > 0)
-                                {
-                                    nWhileCount--;
-                                    await UniTask.Yield();
-                                }
-
-                                if (www.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
-                                {
-                                    AudioClip clip = UnityEngine.Networking.DownloadHandlerAudioClip.GetContent(www);
-                                    __instance.modAudio[nSoundID] = clip;
-                                }
-                            }
-                        }
-                        await UniTask.WaitForSeconds(0.05f);
-                    }
-                }
-
-            }
-
-            if (__instance.ModEnemyConf != null)
-            {
-                foreach (var rPair in __instance.ModEnemyConf.DataMap)
-                {
-                    var nSoundID = rPair.Value.ShowSound;
-
-                    if (nSoundID != 0)
-                    {
-                        var rFileName = rSoundDir + "\\" + nSoundID + ".ogg";
-                        if (File.Exists(rFileName))
-                        {
-                            using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequestMultimedia.GetAudioClip(rFileName, AudioType.OGGVORBIS))
-                            {
-                                var asyncOp = www.SendWebRequest();
-
-                                var nWhileCount = 10000;
-
-                                while (!asyncOp.isDone && nWhileCount > 0)
-                                {
-                                    await UniTask.Yield();
-                                }
-
-                                if (www.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
-                                {
-                                    AudioClip clip = UnityEngine.Networking.DownloadHandlerAudioClip.GetContent(www);
-                                    __instance.modAudio[nSoundID] = clip;
-                                }
-                            }
-                        }
-                        await UniTask.WaitForSeconds(0.05f);
-                    }
-
-                    nSoundID = rPair.Value.AttackSound;
-                    if (nSoundID != 0)
-                    {
-                        var rFileName = rSoundDir + "\\" + nSoundID + ".ogg";
-                        if (File.Exists(rFileName))
-                        {
-                            using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequestMultimedia.GetAudioClip(rFileName, AudioType.OGGVORBIS))
-                            {
-                                var asyncOp = www.SendWebRequest();
-
-                                var nWhileCount = 10000;
-
-                                while (!asyncOp.isDone && nWhileCount > 0)
-                                {
-                                    await UniTask.Yield();
-                                }
-
-                                if (www.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
-                                {
-                                    AudioClip clip = UnityEngine.Networking.DownloadHandlerAudioClip.GetContent(www);
-                                    __instance.modAudio[nSoundID] = clip;
-                                }
-                            }
-                        }
-                        await UniTask.WaitForSeconds(0.05f);
-                    }
-                }
-            }
-        }
-        else
-        {
-            LogUtil.LogError("sound not exist");
-        }
-        var extraSoundDir = rPath + "\\Extra_Sound_Mod";
-        if (Directory.Exists(extraSoundDir))
-        {
-            // enumarate all ogg files in the Extra_Sound_Mod folder and load them
-            foreach (var file in Directory.GetFiles(extraSoundDir, "*.ogg", SearchOption.AllDirectories))
-            {
-                string name = Path.GetFileNameWithoutExtension(file);
-                if (!int.TryParse(name, out int nSoundID))
-                {
-                    Plugin.Logger.LogWarning($"Invalid sound file name: {name}, should be an integer ID.");
-                    continue;
-                }
-                if (nSoundID != 0)
-                {
-                    using (UnityEngine.Networking.UnityWebRequest www = UnityEngine.Networking.UnityWebRequestMultimedia.GetAudioClip(file, AudioType.OGGVORBIS))
-                    {
-                        var asyncOp = www.SendWebRequest();
-
-                        var nWhileCount = 10000;
-                        while (!asyncOp.isDone && nWhileCount > 0)
-                        {
-                            nWhileCount--;
-                            await UniTask.Yield();
-                        }
-
-                        if (www.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
-                        {
-                            AudioClip clip = UnityEngine.Networking.DownloadHandlerAudioClip.GetContent(www);
-                            __instance.modAudio[nSoundID] = clip;
-                        }
-                    }
-                    await UniTask.WaitForSeconds(0.05f);
-                    Plugin.Logger.LogDebug($"Loaded extra sound {nSoundID} from {file}");
-                }
-            }
+            __instance.ModLocalizationConf.DataMap[id] = value;
+            __instance.ModLocalizationConf.DataList.Add(value);
         }
     }
     
-    public static string RStrip(this string s, string suffix)
+    [HarmonyPatch(typeof(ModModel), "LoadModOther")]
+    [HarmonyPostfix]
+    static void LoadModOtherPostfix(ModModel __instance)
+    {
+        foreach (var (name, sprite) in ResourceScanner.GetAllSprites())
+        {
+            __instance.ModSpriteDict[name] = sprite;
+        }
+        foreach (var (id, audioClip) in ResourceScanner.GetAllAudioClips())
+        {
+            __instance.modAudio[id] = audioClip;
+        }
+    }
+
+    private static string RStrip(this string s, string suffix)
     {
         if (s != null && suffix != null && s.EndsWith(suffix))
         {
