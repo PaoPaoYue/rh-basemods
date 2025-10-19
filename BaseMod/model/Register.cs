@@ -59,9 +59,9 @@ public class ModRegister
     private Dictionary<int, Localization> localizationDict = []; // id -> localization
     private Dictionary<int, DescTip> descTipDict = []; // id -> descTip
 
-    private Dictionary<string, int> nameToEventDict = []; // name -> eventId
+    private Dictionary<int, int> EventDict = []; // id -> eventId
     private int eventCounter = 1;
-    private Dictionary<int, int> entityAttributeDict = []; // name -> attrId
+    private Dictionary<int, int> entityAttributeDict = []; // id -> attrId
     private int entityAttributeCounter = 1;
 
     private ModRegister(string modName, List<ModRegister> superRegisters = null)
@@ -103,25 +103,26 @@ public class ModRegister
         GlobalRegister.AddRegistered(ConvertToGlobalId(id), trigger);
     }
 
-    public void RegisterEvent(string name)
+    public int RegisterEvent(int id)
     {
-        if (nameToEventDict.ContainsKey(name))
+        if (EventDict.ContainsKey(id))
         {
-            throw new Exception($"Event name {name} already registered in mod {ModName}!");
+            throw new Exception($"Event with id {id} already registered in mod {ModName}!");
         }
-        var eventId = ConvertToGlobalId(eventCounter++);
-        nameToEventDict[name] = eventId;
+        var eventId = eventCounter++;
+        EventDict[id] = eventId;
+        return eventId;
     }
 
-    public int GetEventId(string name)
+    public int GetEventId(int id)
     {
-        if (nameToEventDict.ContainsKey(name))
+        if (EventDict.ContainsKey(id))
         {
-            return nameToEventDict[name];
+            return EventDict[id];
         }
         foreach (var super in superRegisters)
         {
-            var eventId = super.GetEventId(name);
+            var eventId = super.GetEventId(id);
             if (eventId != -1)
             {
                 return eventId;
