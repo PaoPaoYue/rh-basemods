@@ -62,7 +62,6 @@ public class ModRegister
     private Dictionary<int, int> EventDict = []; // id -> eventId
     private int eventCounter = 1;
     private Dictionary<int, int> entityAttributeDict = []; // id -> attrId
-    private int entityAttributeCounter = 1;
 
     private ModRegister(string modName, List<ModRegister> superRegisters = null)
     {
@@ -167,7 +166,7 @@ public class ModRegister
         {
             throw new Exception($"Entity attribute id {id} already registered in mod {ModName}!");
         }
-        var attrId = ConvertToGlobalId(entityAttributeCounter++);
+        var attrId = ConvertToGlobalId(id);
         entityAttributeDict[id] = attrId;
         return attrId;
     }
@@ -178,7 +177,7 @@ public class ModRegister
         {
             throw new Exception($"Entity attribute id {id} already registered in mod {ModName}!");
         }
-        var attrId = ConvertToGlobalId(entityAttributeCounter++);
+        var attrId = ConvertToGlobalId(id);
         entityAttributeDict[id] = attrId;
 
         cfg.Attribute attr = ReflectionUtil.CreateReadonly<cfg.Attribute>(attrId, id, icon, type);
