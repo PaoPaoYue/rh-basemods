@@ -10,19 +10,17 @@ using BaseMod;
 public static class ResourceScanner
 {
 
-    private static readonly Dictionary<string, Sprite> _assemblySpriteDict = new();
-    private static readonly Dictionary<int, AudioClip> _assemblyAudioClipDict = new();
+    private static readonly Dictionary<string, Sprite> assemblySpriteDict = new();
+    private static readonly Dictionary<int, AudioClip> assemblyAudioClipDict = new();
 
-    public static IEnumerable<KeyValuePair<string, Sprite>> GetAllSprites()
+    public static bool TryGetSprite(string name, out Sprite sprite)
     {
-        foreach (var kv in _assemblySpriteDict)
-            yield return kv;
+        return assemblySpriteDict.TryGetValue(name, out sprite);
     }
 
-    public static IEnumerable<KeyValuePair<int, AudioClip>> GetAllAudioClips()
+    public static bool TryGetSound(int id, out AudioClip clip)
     {
-        foreach (var kv in _assemblyAudioClipDict)
-            yield return kv;
+        return assemblyAudioClipDict.TryGetValue(id, out clip);
     }
 
     internal static async UniTask ScanAssemblyResourcesAsync(Assembly assembly)
@@ -37,7 +35,7 @@ public static class ResourceScanner
                 tasks.Add(LoadSpriteAsync(assembly, resName, (name, sprite) =>
                 {
                     Plugin.Logger.LogDebug($"Loaded embedded sprite resource: {name}");
-                    _assemblySpriteDict[name] = sprite;
+                    assemblySpriteDict[name] = sprite;
                 }));
             }
             else if (resName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase) ||
@@ -47,7 +45,7 @@ public static class ResourceScanner
                 tasks.Add(LoadAudioClipAsync(assembly, resName, (key, clip) =>
                 {
                     Plugin.Logger.LogDebug($"Loaded embedded audio clip resource: {key}");
-                    _assemblyAudioClipDict[key] = clip;
+                    assemblyAudioClipDict[key] = clip;
                 }));
             }
         }

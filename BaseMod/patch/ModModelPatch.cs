@@ -175,20 +175,35 @@ static class ModModelPatch
             __instance.ModLocalizationConf.DataList.Add(value);
         }
     }
-    
-    [HarmonyPatch(typeof(ModModel), "LoadModOther")]
+
+    [HarmonyPatch(typeof(ModModel), "GetModSprite")]
     [HarmonyPostfix]
-    static void LoadModOtherPostfix(ModModel __instance)
+    static void GetModSpritePostfix(ModModel __instance, ref Sprite __result, string rSpriteName)
     {
-        foreach (var (name, sprite) in ResourceScanner.GetAllSprites())
+        if (__result == null && ResourceScanner.TryGetSprite(rSpriteName, out var sprite))
         {
-            __instance.ModSpriteDict[name] = sprite;
-        }
-        foreach (var (id, audioClip) in ResourceScanner.GetAllAudioClips())
-        {
-            __instance.modAudio[id] = audioClip;
+            __result = sprite;
         }
     }
+    
+    [HarmonyPatch(typeof(ModModel), "PlaySound")]
+    [HarmonyPostfix]
+    static void PlaySoundPostfix(ModModel __instance, ref AudioSource ___mAudioSource, ref bool __result, int nSoundID)
+    {
+        if (!__result && ResourceScanner.TryGetSound(nSoundID, out var clip))
+        {
+            if (___mAudioSource == null)
+            {
+                GameObject gameObject = new GameObject("audioObject");
+                ___mAudioSource = gameObject.AddComponent<AudioSource>();
+            }
+            ___mAudioSource.Stop();
+            ___mAudioSource.clip = clip;
+            ___mAudioSource.Play();
+            __result = true;
+        }
+    }
+
 
     private static string RStrip(this string s, string suffix)
     {
