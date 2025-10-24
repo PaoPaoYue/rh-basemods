@@ -53,15 +53,17 @@ public class ModRegister
 
     internal List<ModRegister> superRegisters = [];
 
-    private Dictionary<int, IEventAction> eventActionDict = []; // id -> action
-    private Dictionary<int, ElementTrigger> elementTriggerDict = []; // id -> (eventId, trigger)
-    private Dictionary<int, RelicTrigger> relicTriggerDict = []; // id -> (eventId, trigger)
-    private Dictionary<int, Localization> localizationDict = []; // id -> localization
-    private Dictionary<int, DescTip> descTipDict = []; // id -> descTip
+    internal Dictionary<int, IEventAction> eventActionDict = []; // id -> action
+    internal Dictionary<int, Role> roleDict = []; // id -> role
+    internal Dictionary<int, PlayerTrigger> playerTriggerDict = []; // id -> (eventId, trigger)
+    internal Dictionary<int, ElementTrigger> elementTriggerDict = []; // id -> (eventId, trigger)
+    internal Dictionary<int, RelicTrigger> relicTriggerDict = []; // id -> (eventId, trigger)
+    internal Dictionary<int, Localization> localizationDict = []; // id -> localization
+    internal Dictionary<int, DescTip> descTipDict = []; // id -> descTip
 
-    private Dictionary<int, int> EventDict = []; // id -> eventId
+    internal Dictionary<int, int> EventDict = []; // id -> eventId
     private int eventCounter = 1;
-    private Dictionary<int, int> entityAttributeDict = []; // id -> attrId
+    internal Dictionary<int, int> entityAttributeDict = []; // id -> attrId
 
     private ModRegister(string modName, List<ModRegister> superRegisters = null)
     {
@@ -72,6 +74,16 @@ public class ModRegister
         }
     }
 
+    public void RegisterRole(int id, Role role)
+    {
+        if (roleDict.ContainsKey(id))
+        {
+            throw new Exception($"Role with id {id} already registered in mod {ModName}!");
+        }
+        roleDict[id] = role;
+        GlobalRegister.AddRegistered(id, role);
+    }
+
     public void RegisterEventAction(int id, IEventAction action)
     {
         if (eventActionDict.ContainsKey(id))
@@ -80,6 +92,16 @@ public class ModRegister
         }
         eventActionDict[id] = action;
         GlobalRegister.AddRegistered(ConvertToGlobalId(id), action);
+    }
+
+    public void RegisterPlayerTrigger(int id, PlayerTrigger trigger)
+    {
+        if (playerTriggerDict.ContainsKey(id))
+        {
+            throw new Exception($"Player trigger with id {id} already registered in mod {ModName}!");
+        }
+        playerTriggerDict[id] = trigger;
+        GlobalRegister.AddRegistered(ConvertToGlobalId(id), trigger);
     }
 
     public void RegisterElementTrigger(int id, ElementTrigger trigger)

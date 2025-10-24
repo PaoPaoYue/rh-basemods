@@ -4,6 +4,16 @@ using Game;
 
 namespace BaseMod;
 
+public abstract class PlayerTrigger
+{
+    public int EventId;
+    public PlayerTrigger(int eventId)
+    {
+        EventId = eventId;
+    }
+    public abstract bool OnTrigger(Entity player, Role playerConf, EventArg rEventArg);
+}
+
 public abstract class ElementTrigger
 {
     public int EventId;

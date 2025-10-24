@@ -20,6 +20,11 @@ public class Plugin : BaseUnityPlugin
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(ModModelPatch));
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(RelicEntityPatch));
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(RelicTipCellPatch));
+        HarmonyLib.Harmony.CreateAndPatchAll(typeof(PlayerEntityPatch));
+        HarmonyLib.Harmony.CreateAndPatchAll(typeof(PlayerInfoPatch));
+        HarmonyLib.Harmony.CreateAndPatchAll(typeof(HardRoleInfoPatch));
+        HarmonyLib.Harmony.CreateAndPatchAll(typeof(UIHardChoosePatch));
+        HarmonyLib.Harmony.CreateAndPatchAll(typeof(UILeaderboardPatch));
         Logger.LogInfo("Initialization completed!");
     }
 }

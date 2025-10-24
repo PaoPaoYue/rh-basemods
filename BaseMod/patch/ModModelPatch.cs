@@ -1,12 +1,12 @@
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection.Emit;
-using Game;
 using cfg;
-using Cysharp.Threading.Tasks;
-using System.IO;
-using UnityEngine;
 using cfg.element;
+using cfg.role;
+using Game;
+using UnityEngine;
+using UnityEngine.UIElements.Collections;
 
 namespace BaseMod;
 
@@ -64,13 +64,13 @@ static class ModModelPatch
     {
         if (ModRegister.IsValidModId(element.TriggerType) && GlobalRegister.TryGetGlobalId<ElementTrigger>(modName, element.TriggerType, out int triggerGlobalId))
         {
-            ReflectionUtil.TrySetReadonlyField(element, "TriggerType", triggerGlobalId);
             Plugin.Logger.LogDebug($"Overwrite Element {element.Id} TriggerType from {element.TriggerType} to {triggerGlobalId}");
+            ReflectionUtil.TrySetReadonlyField(element, "TriggerType", triggerGlobalId);
         }
         if (ModRegister.IsValidModId(element.TriggerAction) && GlobalRegister.TryGetGlobalId<IEventAction>(modName, element.TriggerAction, out int actionGlobalId))
         {
-            ReflectionUtil.TrySetReadonlyField(element, "TriggerAction", actionGlobalId);
             Plugin.Logger.LogDebug($"Overwrite Element {element.Id} TriggerAction from {element.TriggerAction} to {actionGlobalId}");
+            ReflectionUtil.TrySetReadonlyField(element, "TriggerAction", actionGlobalId);
         }
 
         bool changed = false;
@@ -80,8 +80,8 @@ static class ModModelPatch
             var tip = (int)desctipCopy[i];
             if (ModRegister.IsValidModId(tip) && GlobalRegister.TryGetGlobalId<DescTip>(modName, tip, out int descTipGlobalId))
             {
-                desctipCopy[i] = (Etip)descTipGlobalId;
                 Plugin.Logger.LogDebug($"Overwrite Element {element.Id} Desctip from {tip} to {descTipGlobalId}");
+                desctipCopy[i] = (Etip)descTipGlobalId;
                 changed = true;
             }
         }
@@ -140,13 +140,13 @@ static class ModModelPatch
     {
         if (ModRegister.IsValidModId(relic.TriggerType) && GlobalRegister.TryGetGlobalId<RelicTrigger>(modName, relic.TriggerType, out int triggerGlobalId))
         {
-            ReflectionUtil.TrySetReadonlyField(relic, "TriggerType", triggerGlobalId);
             Plugin.Logger.LogDebug($"Overwrite Relic {relic.Id} TriggerType from {relic.TriggerType} to {triggerGlobalId}");
+            ReflectionUtil.TrySetReadonlyField(relic, "TriggerType", triggerGlobalId);
         }
         if (ModRegister.IsValidModId(relic.TriggerAction) && GlobalRegister.TryGetGlobalId<IEventAction>(modName, relic.TriggerAction, out int actionGlobalId))
         {
-            ReflectionUtil.TrySetReadonlyField(relic, "TriggerAction", actionGlobalId);
             Plugin.Logger.LogDebug($"Overwrite Relic {relic.Id} TriggerAction from {relic.TriggerAction} to {actionGlobalId}");
+            ReflectionUtil.TrySetReadonlyField(relic, "TriggerAction", actionGlobalId);
         }
 
         bool changed = false;
@@ -156,8 +156,8 @@ static class ModModelPatch
             var tip = (int)descTipCopy[i];
             if (ModRegister.IsValidModId(tip) && GlobalRegister.TryGetGlobalId<DescTip>(modName, tip, out int descTipGlobalId))
             {
-                descTipCopy[i] = (Etip)descTipGlobalId;
                 Plugin.Logger.LogDebug($"Overwrite Relic {relic.Id} DescTip from {tip} to {descTipGlobalId}");
+                descTipCopy[i] = (Etip)descTipGlobalId;
                 changed = true;
             }
         }
@@ -205,12 +205,4 @@ static class ModModelPatch
     }
 
 
-    private static string RStrip(this string s, string suffix)
-    {
-        if (s != null && suffix != null && s.EndsWith(suffix))
-        {
-            return s[..^suffix.Length];
-        }
-        return s;
-    }
 }
