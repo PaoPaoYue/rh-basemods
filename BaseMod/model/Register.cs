@@ -61,10 +61,9 @@ public class ModRegister
     internal Dictionary<int, Localization> localizationDict = []; // id -> localization
     internal Dictionary<int, DescTip> descTipDict = []; // id -> descTip
 
-    internal Dictionary<int, int> EventDict = []; // id -> eventId
-    private int eventCounter = 1;
+    internal Dictionary<int, int> eventDict = []; // id -> eventId
     internal Dictionary<int, int> entityAttributeDict = []; // id -> attrId
-
+    internal Dictionary<int, int> relicGlobalValueDict = []; // id -> globalValueId
     private ModRegister(string modName, List<ModRegister> superRegisters = null)
     {
         ModName = modName;
@@ -126,20 +125,20 @@ public class ModRegister
 
     public int RegisterEvent(int id)
     {
-        if (EventDict.ContainsKey(id))
+        if (eventDict.ContainsKey(id))
         {
             throw new Exception($"Event with id {id} already registered in mod {ModName}!");
         }
-        var eventId = eventCounter++;
-        EventDict[id] = eventId;
+        var eventId = ConvertToGlobalId(id);
+        eventDict[id] = eventId;
         return eventId;
     }
 
     public int GetEventId(int id)
     {
-        if (EventDict.ContainsKey(id))
+        if (eventDict.ContainsKey(id))
         {
-            return EventDict[id];
+            return eventDict[id];
         }
         foreach (var super in superRegisters)
         {
@@ -220,6 +219,34 @@ public class ModRegister
             if (attrId != -1)
             {
                 return attrId;
+            }
+        }
+        return -1;
+    }
+
+    public int RegisterRelicGlobalValue(int id)
+    {
+        if (relicGlobalValueDict.ContainsKey(id))
+        {
+            throw new Exception($"Relic global value id {id} already registered in mod {ModName}!");
+        }
+        var globalValueId = ConvertToGlobalId(id);
+        relicGlobalValueDict[id] = globalValueId;
+        return globalValueId;
+    }
+
+    public int GetRelicGlobalValueId(int id)
+    {
+        if (relicGlobalValueDict.ContainsKey(id))
+        {
+            return relicGlobalValueDict[id];
+        }
+        foreach (var super in superRegisters)
+        {
+            var globalValueId = super.GetRelicGlobalValueId(id);
+            if (globalValueId != -1)
+            {
+                return globalValueId;
             }
         }
         return -1;
