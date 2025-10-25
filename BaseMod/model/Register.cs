@@ -131,6 +131,7 @@ public class ModRegister
         }
         var eventId = ConvertToGlobalId(id);
         eventDict[id] = eventId;
+        GlobalRegister.AddRegistered(eventId, id);
         return eventId;
     }
 
@@ -189,6 +190,7 @@ public class ModRegister
         }
         var attrId = ConvertToGlobalId(id);
         entityAttributeDict[id] = attrId;
+        GlobalRegister.AddRegistered(attrId, id);
         return attrId;
     }
 
@@ -204,6 +206,7 @@ public class ModRegister
         cfg.Attribute attr = ReflectionUtil.CreateReadonly<cfg.Attribute>(attrId, id, icon, type);
 
         GlobalRegister.AddRegistered(attrId, attr);
+        GlobalRegister.AddRegistered(attrId, id);
         return attrId;
     }
 
@@ -232,6 +235,7 @@ public class ModRegister
         }
         var globalValueId = ConvertToGlobalId(id);
         relicGlobalValueDict[id] = globalValueId;
+        GlobalRegister.AddRegistered(globalValueId, id);
         return globalValueId;
     }
 

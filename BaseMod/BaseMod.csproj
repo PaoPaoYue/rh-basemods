@@ -32,8 +32,12 @@
       <HintPath>../libs/Unity.TextMeshPro.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="UnityEngine.UI">
+    <Reference Include="UIFame">
       <HintPath>../libs/UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  <Reference Include="UIFrame">
+      <HintPath>../libs/UIFrame.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>

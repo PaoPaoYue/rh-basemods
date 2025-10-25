@@ -55,7 +55,8 @@ class PlayerEntityPatch
     static bool OnEventPrefix(PlayerEntity __instance, EventArg rEventArg)
     {
         var triggerType = __instance.Conf.TriggerType;
-
+        if (!ModRegister.IsGlobalId(triggerType))
+            return true;
 
         if (GlobalRegister.TryGetRegistered<PlayerTrigger>(triggerType, out var trigger))
         {

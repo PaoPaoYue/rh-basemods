@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using cfg;
 using cfg.element;
-using cfg.role;
 using Game;
 using UnityEngine;
-using UnityEngine.UIElements.Collections;
 
 namespace BaseMod;
 
@@ -72,21 +70,46 @@ static class ModModelPatch
             Plugin.Logger.LogDebug($"Overwrite Element {element.Id} TriggerAction from {element.TriggerAction} to {actionGlobalId}");
             ReflectionUtil.TrySetReadonlyField(element, "TriggerAction", actionGlobalId);
         }
-
-        bool changed = false;
-        var desctipCopy = new List<Etip>(element.Desctip);
-        for (int i = 0; i < desctipCopy.Count; i++)
+        for (int i = 0; i < element.TriggerParam.Count; i++)
         {
-            var tip = (int)desctipCopy[i];
+            var id = element.TriggerParam[i];
+            if (ModRegister.IsValidModId(id) && GlobalRegister.TryGetGlobalId<int>(modName, id, out int globalId))
+            {
+                Plugin.Logger.LogDebug($"Overwrite Element {element.Id} TriggerParam from {id} to {globalId}");
+                element.TriggerParam[i] = globalId;
+            }
+        }
+        for (int i = 0; i < element.TriggerValue.Count; i++)
+        {
+            var ids = element.TriggerValue[i].Value;
+            for (int j = 0; j < ids.Count; j++)
+            {
+                var id = ids[j];
+                if (ModRegister.IsValidModId(id) && GlobalRegister.TryGetGlobalId<int>(modName, id, out int globalId))
+                {
+                    Plugin.Logger.LogDebug($"Overwrite Element {element.Id} TriggerValue from {id} to {globalId}");
+                    ids[j] = globalId;
+                }
+            }
+        }
+        for (int i = 0; i < element.OtherValue.Count; i++)
+        {
+            var id = element.OtherValue[i];
+            if (ModRegister.IsValidModId(id) && GlobalRegister.TryGetGlobalId<int>(modName, id, out int globalId))
+            {
+                Plugin.Logger.LogDebug($"Overwrite Element {element.Id} OtherValue from {id} to {globalId}");
+                element.OtherValue[i] = globalId;
+            }
+        }
+        for (int i = 0; i < element.Desctip.Count; i++)
+        {
+            var tip = (int)element.Desctip[i];
             if (ModRegister.IsValidModId(tip) && GlobalRegister.TryGetGlobalId<DescTip>(modName, tip, out int descTipGlobalId))
             {
                 Plugin.Logger.LogDebug($"Overwrite Element {element.Id} Desctip from {tip} to {descTipGlobalId}");
-                desctipCopy[i] = (Etip)descTipGlobalId;
-                changed = true;
+                element.Desctip[i] = (Etip)descTipGlobalId;
             }
         }
-        if (changed)
-            ReflectionUtil.TrySetReadonlyField(element, "Desctip", desctipCopy);
     }
 
     [HarmonyPatch(typeof(ModModel), "LoadRelicData")]
@@ -149,20 +172,52 @@ static class ModModelPatch
             ReflectionUtil.TrySetReadonlyField(relic, "TriggerAction", actionGlobalId);
         }
 
-        bool changed = false;
-        var descTipCopy = new List<Etip>(relic.DescTip);
-        for (int i = 0; i < descTipCopy.Count; i++)
+        for (int i = 0; i < relic.Passive.Count; i++)
         {
-            var tip = (int)descTipCopy[i];
+            var id = relic.Passive[i];
+            if (ModRegister.IsValidModId(id) && GlobalRegister.TryGetGlobalId<int>(modName, id, out int globalId))
+            {
+                Plugin.Logger.LogDebug($"Overwrite Relic {relic.Id} Passive from {id} to {globalId}");
+                relic.Passive[i] = globalId;
+            }
+        }
+
+        for (int i = 0; i < relic.TriggerParam.Count; i++)
+        {
+            var id = relic.TriggerParam[i];
+            if (ModRegister.IsValidModId(id) && GlobalRegister.TryGetGlobalId<int>(modName, id, out int globalId))
+            {
+                Plugin.Logger.LogDebug($"Overwrite Relic {relic.Id} TriggerParam from {id} to {globalId}");
+                relic.TriggerParam[i] = globalId;
+            }
+        }
+        for (int i = 0; i < relic.TriggerValue.Count; i++)
+        {
+            var id = relic.TriggerValue[i];
+            if (ModRegister.IsValidModId(id) && GlobalRegister.TryGetGlobalId<int>(modName, id, out int globalId))
+            {
+                Plugin.Logger.LogDebug($"Overwrite Relic {relic.Id} TriggerValue from {id} to {globalId}");
+                relic.TriggerValue[i] = globalId;
+            }
+        }
+        for (int i = 0; i < relic.OtherValue.Count; i++)
+        {
+            var id = relic.OtherValue[i];
+            if (ModRegister.IsValidModId(id) && GlobalRegister.TryGetGlobalId<int>(modName, id, out int globalId))
+            {
+                Plugin.Logger.LogDebug($"Overwrite Relic {relic.Id} OtherValue from {id} to {globalId}");
+                relic.OtherValue[i] = globalId;
+            }
+        }
+        for (int i = 0; i < relic.DescTip.Count; i++)
+        {
+            var tip = (int)relic.DescTip[i];
             if (ModRegister.IsValidModId(tip) && GlobalRegister.TryGetGlobalId<DescTip>(modName, tip, out int descTipGlobalId))
             {
                 Plugin.Logger.LogDebug($"Overwrite Relic {relic.Id} DescTip from {tip} to {descTipGlobalId}");
-                descTipCopy[i] = (Etip)descTipGlobalId;
-                changed = true;
+                relic.DescTip[i] = (Etip)descTipGlobalId;
             }
         }
-        if (changed)
-            ReflectionUtil.TrySetReadonlyField(relic, "DescTip", descTipCopy);
     }
 
     [HarmonyPatch(typeof(ModModel), "LoadLocalizationData")]

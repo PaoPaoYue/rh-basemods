@@ -1,10 +1,11 @@
 using HarmonyLib;
 using Game;
-using Cysharp.Threading.Tasks;
 using UnityEngine.UI;
 using UnityEngine;
 using System;
 using cfg;
+using System.Collections.Generic;
+using System.Reflection.Emit;
 
 namespace BaseMod;
 
@@ -13,7 +14,7 @@ static class PlayerInfoPatch
 
     [HarmonyPatch(typeof(PlayerInfo), "Show")]
     [HarmonyPrefix]
-    static bool ShowPrefix(PlayerInfo __instance,  ref Sprite ___mOriginSprite, ref Sprite ___mHurtSprite, ref Sprite ___mWinSprite, ref Sprite ___mFailSprite, ref Image ___imgIcon, ref EEntityType ___mOwner, int nRoleID, EEntityType rOwner)
+    static bool ShowPrefix(PlayerInfo __instance, ref Sprite ___mOriginSprite, ref Sprite ___mHurtSprite, ref Sprite ___mWinSprite, ref Sprite ___mFailSprite, ref Image ___imgIcon, ref EEntityType ___mOwner, int nRoleID, EEntityType rOwner)
     {
         if (GlobalRegister.TryGetRegistered<Role>(nRoleID, out var role))
         {
@@ -25,20 +26,63 @@ static class PlayerInfoPatch
     }
 
     static void UpdateIcon(string rSpriteName, ref Sprite ___mOriginSprite, ref Sprite ___mHurtSprite, ref Sprite ___mWinSprite, ref Sprite ___mFailSprite, ref Image ___imgIcon)
-{
-    try
     {
-        ___mOriginSprite = Singleton<Model>.Instance.Mod.GetModSprite(rSpriteName);
-        ___mHurtSprite = Singleton<Model>.Instance.Mod.GetModSprite(rSpriteName + "_1");
-        ___mWinSprite = Singleton<Model>.Instance.Mod.GetModSprite(rSpriteName + "_2");
-        ___mFailSprite = Singleton<Model>.Instance.Mod.GetModSprite(rSpriteName + "_3");
+        try
+        {
+            ___mOriginSprite = Singleton<Model>.Instance.Mod.GetModSprite(rSpriteName);
+            ___mHurtSprite = Singleton<Model>.Instance.Mod.GetModSprite(rSpriteName + "_1");
+            ___mWinSprite = Singleton<Model>.Instance.Mod.GetModSprite(rSpriteName + "_2");
+            ___mFailSprite = Singleton<Model>.Instance.Mod.GetModSprite(rSpriteName + "_3");
 
-        ___imgIcon.sprite = ___mOriginSprite;
-        ___imgIcon.SetNativeSize();
+            ___imgIcon.sprite = ___mOriginSprite;
+            ___imgIcon.SetNativeSize();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"UpdateIcon failed: {ex}");
+        }
     }
-    catch (Exception ex)
+
+    [HarmonyPatch(typeof(PlayerInfo), "UpdatePlayerAttribute")]
+    [HarmonyTranspiler]
+    static IEnumerable<CodeInstruction> UpdateAttributeTranspiler(IEnumerable<CodeInstruction> instructions)
     {
-        Debug.LogError($"UpdateIcon failed: {ex}");
+        return new CodeMatcher(instructions)
+             .MatchForward(false,
+                new CodeMatch(OpCodes.Ldloc_0),
+                new CodeMatch(ci =>
+                    ci.opcode == OpCodes.Stloc_S &&
+                    ((ci.operand is int i && i == 6) ||
+                    (ci.operand is LocalBuilder lb && lb.LocalIndex == 6)))
+            )
+             .InsertAndAdvance(
+                 new CodeInstruction(OpCodes.Ldarg_0),
+                 new CodeInstruction(OpCodes.Ldloc_0),
+                 new CodeInstruction(OpCodes.Ldloc_1),
+                 Transpilers.EmitDelegate(UpdatePlayerAttributePatch),
+                 new CodeInstruction(OpCodes.Stloc_0)
+             )
+             .InstructionEnumeration();
     }
-}
+
+    static int UpdatePlayerAttributePatch(PlayerInfo __instance, int nIndex, PlayerEntity playerEntity)
+    {
+        foreach (var (id, attr) in GlobalRegister.EnumerateRegistered<cfg.Attribute>())
+        {
+            int value = playerEntity.GetAttribute(id);
+            if (value > 0)
+            {
+                if (ReflectionUtil.TryInvokePrivateMethod(__instance, "CreateAttribute", out BuffCell buffCell, [nIndex]))
+                {
+                    buffCell.Show(id, value);
+                    nIndex++;
+                }
+                else
+                {
+                    Debug.LogError("Failed to invoke CreateAttribute in PlayerInfoPatch");
+                }
+            }
+        }
+        return nIndex;
+    }
 }
