@@ -48,21 +48,17 @@ static class PlayerInfoPatch
     static IEnumerable<CodeInstruction> UpdateAttributeTranspiler(IEnumerable<CodeInstruction> instructions)
     {
         return new CodeMatcher(instructions)
-             .MatchForward(false,
-                new CodeMatch(OpCodes.Ldloc_0),
-                new CodeMatch(ci =>
-                    ci.opcode == OpCodes.Stloc_S &&
-                    ((ci.operand is int i && i == 6) ||
-                    (ci.operand is LocalBuilder lb && lb.LocalIndex == 6)))
+            .MatchForward(false,
+                new CodeMatch(OpCodes.Stloc_2)
             )
-             .InsertAndAdvance(
-                 new CodeInstruction(OpCodes.Ldarg_0),
-                 new CodeInstruction(OpCodes.Ldloc_0),
-                 new CodeInstruction(OpCodes.Ldloc_1),
-                 Transpilers.EmitDelegate(UpdatePlayerAttributePatch),
-                 new CodeInstruction(OpCodes.Stloc_0)
-             )
-             .InstructionEnumeration();
+            .InsertAndAdvance(
+                new CodeInstruction(OpCodes.Ldarg_0),
+                new CodeInstruction(OpCodes.Ldloc_0),
+                new CodeInstruction(OpCodes.Ldloc_1),
+                Transpilers.EmitDelegate(UpdatePlayerAttributePatch),
+                new CodeInstruction(OpCodes.Stloc_0)
+            )
+            .InstructionEnumeration();
     }
 
     static int UpdatePlayerAttributePatch(PlayerInfo __instance, int nIndex, PlayerEntity playerEntity)

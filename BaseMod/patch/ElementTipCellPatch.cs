@@ -11,7 +11,7 @@ static class ElementTipCellPatch
 
     [HarmonyPatch(typeof(ElementTipCell), "Show")]
     [HarmonyPostfix]
-    static void ShowPostfix(ref ElementTipCell __instance, UnityEngine.UI.Text ___txModElementOtherTitle, UnityEngine.UI.Text ___txModElementOtherDesc, TextMeshProUGUI ___txElementOtherTipTitle, TextMeshProUGUI ___txElementOtherTipDesc, GameObject ___objElementOtherTip)
+    static void ShowPostfix(ElementTipCell __instance, UnityEngine.UI.Text ___txModElementOtherTitle, UnityEngine.UI.Text ___txModElementOtherDesc, TextMeshProUGUI ___txElementOtherTipTitle, TextMeshProUGUI ___txElementOtherTipDesc, GameObject ___objElementOtherTip)
     {
         Element tipConf = Singleton<Model>.Instance.Element.TipConf;
         foreach (var tip in tipConf.Desctip)

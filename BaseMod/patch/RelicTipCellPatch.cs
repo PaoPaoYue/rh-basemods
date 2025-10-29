@@ -11,7 +11,7 @@ static class RelicTipCellPatch
 
     [HarmonyPatch(typeof(RelicTipCell), "Show")]
     [HarmonyPostfix]
-    static void ShowPostfix(ref RelicTipCell __instance, Relics rRelicConf, TextMeshProUGUI ___txRelicOtherTipTitle, TextMeshProUGUI ___txRelicOtherTipDesc, GameObject ___objRelicOtherTip)
+    static void ShowPostfix(RelicTipCell __instance, Relics rRelicConf, TextMeshProUGUI ___txRelicOtherTipTitle, TextMeshProUGUI ___txRelicOtherTipDesc, GameObject ___objRelicOtherTip)
     {
         if (___objRelicOtherTip != null)
         {            

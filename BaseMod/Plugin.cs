@@ -12,6 +12,7 @@ public class Plugin : BaseUnityPlugin
     {
         Logger = base.Logger;
         Logger.LogInfo("Initializing...");
+        HarmonyLib.Harmony.CreateAndPatchAll(typeof(BattleManagerPatch));
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(BattleOrderManagerPatch));
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(BuffModelPatch));
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(ElementEntityPatch));

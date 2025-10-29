@@ -194,7 +194,7 @@ public class ModRegister
         return attrId;
     }
 
-    public int RegisterVisableAttribute(int id, string icon, int type = 0) // type: 0 int, 1 percent
+    public int RegisterVisableAttribute(int id, int nameId, string icon, int type = 0) // type: 0 int, 1 percent
     {
         if (entityAttributeDict.ContainsKey(id))
         {
@@ -203,7 +203,7 @@ public class ModRegister
         var attrId = ConvertToGlobalId(id);
         entityAttributeDict[id] = attrId;
 
-        cfg.Attribute attr = ReflectionUtil.CreateReadonly<cfg.Attribute>(attrId, id, icon, type);
+        cfg.Attribute attr = ReflectionUtil.CreateReadonly<cfg.Attribute>(attrId, nameId, icon, type);
 
         GlobalRegister.AddRegistered(attrId, attr);
         GlobalRegister.AddRegistered(attrId, id);
