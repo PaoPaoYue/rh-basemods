@@ -49,19 +49,19 @@ static class PlayerInfoPatch
     {
         return new CodeMatcher(instructions)
             .MatchForward(false,
-                new CodeMatch(OpCodes.Stloc_2)
+                new CodeMatch(OpCodes.Ldloc_0),
+                new CodeMatch(OpCodes.Stloc_S)
             )
+            .Advance(1)
             .InsertAndAdvance(
                 new CodeInstruction(OpCodes.Ldarg_0),
-                new CodeInstruction(OpCodes.Ldloc_0),
                 new CodeInstruction(OpCodes.Ldloc_1),
-                Transpilers.EmitDelegate(UpdatePlayerAttributePatch),
-                new CodeInstruction(OpCodes.Stloc_0)
+                Transpilers.EmitDelegate(UpdatePlayerAttributePatch)
             )
             .InstructionEnumeration();
     }
 
-    static int UpdatePlayerAttributePatch(PlayerInfo __instance, int nIndex, PlayerEntity playerEntity)
+    static int UpdatePlayerAttributePatch(int nIndex, PlayerInfo __instance, PlayerEntity playerEntity)
     {
         foreach (var (id, attr) in GlobalRegister.EnumerateRegistered<cfg.Attribute>())
         {

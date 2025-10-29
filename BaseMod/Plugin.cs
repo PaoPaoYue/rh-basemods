@@ -26,6 +26,7 @@ public class Plugin : BaseUnityPlugin
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(HardRoleInfoPatch));
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(UIHardChoosePatch));
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(UILeaderboardPatch));
+        HarmonyLib.Harmony.CreateAndPatchAll(typeof(EnemyCellPatch));
         Logger.LogInfo("Initialization completed!");
     }
 }
