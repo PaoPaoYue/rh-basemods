@@ -15,13 +15,13 @@ static class UILeaderboardPatch
     {
         return new CodeMatcher(instructions)
             .MatchForward(false,
-                new CodeMatch(OpCodes.Stloc_0)
+                new CodeMatch(OpCodes.Stloc_1)
             )
             .Advance(1)
             .InsertAndAdvance(
                 new CodeInstruction(OpCodes.Ldloc_0),
                 Transpilers.EmitDelegate(FilterModRolePatch),
-                new CodeInstruction(OpCodes.Stloc_0)
+                new CodeInstruction(OpCodes.Stloc_1)
             )
             .InstructionEnumeration();
     }
