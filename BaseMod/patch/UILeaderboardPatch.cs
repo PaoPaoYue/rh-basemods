@@ -19,7 +19,7 @@ static class UILeaderboardPatch
             )
             .Advance(1)
             .InsertAndAdvance(
-                new CodeInstruction(OpCodes.Ldloc_0),
+                new CodeInstruction(OpCodes.Ldloc_1),
                 Transpilers.EmitDelegate(FilterModRolePatch),
                 new CodeInstruction(OpCodes.Stloc_1)
             )
