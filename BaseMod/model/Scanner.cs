@@ -10,6 +10,8 @@ using BaseMod;
 public static class ResourceScanner
 {
 
+    private static readonly List<UniTask> loadingTasks = new();
+
     private static readonly Dictionary<string, Sprite> assemblySpriteDict = new();
     private static readonly Dictionary<int, AudioClip> assemblyAudioClipDict = new();
 
@@ -23,34 +25,37 @@ public static class ResourceScanner
         return assemblyAudioClipDict.TryGetValue(id, out clip);
     }
 
-    internal static async UniTask ScanAssemblyResourcesAsync(Assembly assembly)
+    internal static void ScanAssemblyResourcesAsync(Assembly assembly)
     {
         var resourceNames = assembly.GetManifestResourceNames();
-        var tasks = new List<UniTask>();
 
         foreach (var resName in resourceNames)
         {
             if (resName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
             {
-                tasks.Add(LoadSpriteAsync(assembly, resName, (name, sprite) =>
+                loadingTasks.Add(UniTask.Defer(() => LoadSpriteAsync(assembly, resName, (name, sprite) =>
                 {
                     Plugin.Logger.LogDebug($"Loaded embedded sprite resource: {name}");
                     assemblySpriteDict[name] = sprite;
-                }));
+                })));
             }
             else if (resName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase) ||
                      resName.EndsWith(".ogg", StringComparison.OrdinalIgnoreCase) ||
                      resName.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase))
             {
-                tasks.Add(LoadAudioClipAsync(assembly, resName, (key, clip) =>
+                loadingTasks.Add(UniTask.Defer(() => LoadAudioClipAsync(assembly, resName, (key, clip) =>
                 {
                     Plugin.Logger.LogDebug($"Loaded embedded audio clip resource: {key}");
                     assemblyAudioClipDict[key] = clip;
-                }));
+                })));
             }
         }
+    }
 
-        await UniTask.WhenAll(tasks);
+    internal static async UniTask Load()
+    {
+        Plugin.Logger.LogDebug("Loading embedded resources from assemblies...");
+        await UniTask.WhenAll(loadingTasks);
     }
 
     private static async UniTask LoadSpriteAsync(Assembly assembly, string resName, Action<string, Sprite> callback)

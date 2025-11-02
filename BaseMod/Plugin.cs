@@ -27,6 +27,7 @@ public class Plugin : BaseUnityPlugin
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(UIHardChoosePatch));
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(UILeaderboardPatch));
         HarmonyLib.Harmony.CreateAndPatchAll(typeof(EnemyCellPatch));
+        HarmonyLib.Harmony.CreateAndPatchAll(typeof(GameManagerPatch));
         Logger.LogInfo("Initialization completed!");
     }
 }

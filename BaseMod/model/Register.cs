@@ -42,7 +42,7 @@ public class ModRegister
         var modRegister = new ModRegister(modName, superMods);
         modRegister.ModIndex = GlobalRegister.AddModRegister(modName, modRegister);
 
-        ResourceScanner.ScanAssemblyResourcesAsync(Assembly.GetCallingAssembly()).Forget();
+        ResourceScanner.ScanAssemblyResourcesAsync(Assembly.GetCallingAssembly());
 
         return modRegister;
     }
