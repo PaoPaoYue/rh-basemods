@@ -28,6 +28,14 @@
       <HintPath>../libs/BaseMod.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>../libs/UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UIFrame">
+      <HintPath>../libs/UIFrame.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
 
     <!-- 将 PNG 文件嵌入 DLL -->
     <EmbeddedResource Include="assets\**\*.png" />

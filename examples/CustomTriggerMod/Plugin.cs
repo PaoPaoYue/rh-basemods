@@ -23,8 +23,10 @@ public class Plugin : BaseUnityPlugin
         Register = ModRegister.Create(ModName);
 
         Register.RegisterDescTip(100001, new DescTip(1000001, 1000002));
-        var attrId = Register.RegisterVisableAttribute(100001, "hasDoneBattleCry");
+        var attrId = Register.RegisterVisableAttribute(100001, 1000001, "hasDoneBattleCry");
         Register.RegisterElementTrigger(100001, new BattleCryTrigger(attrId));
+
+        HarmonyLib.Harmony.CreateAndPatchAll(typeof(PrepareCellPatch));
     }
 
     public class BattleCryTrigger : ElementTrigger

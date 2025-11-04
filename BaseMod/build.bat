@@ -5,7 +5,7 @@ setlocal enabledelayedexpansion
 for %%I in ("%cd%") do set "CURRENT_NAME=%%~nxI"
 
 :: Set the target folder path (relative to parent artifacts folder)
-set "TARGET_DIR=..\artifacts\%CURRENT_NAME%"
+set "TARGET_DIR=..\artifacts\%CURRENT_NAME%\plugins"
 
 :: Set the libs folder path (relative to examples folder)
 set "LIBS_DIR=..\examples\libs"
