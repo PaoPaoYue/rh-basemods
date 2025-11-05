@@ -60,6 +60,15 @@ static class ModModelPatch
 
     static void OverwriteElement(string modName, Element element)
     {
+        for (int i = 0; i < element.Attribute.Count; i++)
+        {
+            var id = element.Attribute[i].ID;
+            if (ModRegister.IsValidModId(id) && GlobalRegister.TryGetGlobalId<int>(modName, id, out int globalId))
+            {
+                Plugin.Logger.LogDebug($"Overwrite Element {element.Id} Attribute from {id} to {globalId}");
+                ReflectionUtil.TrySetReadonlyField(element.Attribute[i], "ID", globalId);
+            }
+        }
         if (ModRegister.IsValidModId(element.TriggerType) && GlobalRegister.TryGetGlobalId<ElementTrigger>(modName, element.TriggerType, out int triggerGlobalId))
         {
             Plugin.Logger.LogDebug($"Overwrite Element {element.Id} TriggerType from {element.TriggerType} to {triggerGlobalId}");
