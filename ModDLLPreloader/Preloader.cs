@@ -29,11 +29,13 @@ namespace ModDllPreloader
                 var dlls = ScanMods();
                 if (dlls.Count == 0)
                 {
+                    DeleteAllDlls();
                     Logger.LogInfo("No mod DLLs found, skipping.");
                     return;
                 }
                 if (dlls.Count > 200)
                 {
+                    DeleteAllDlls();
                     Logger.LogError($"Too many DLLs found ({dlls.Count}), consider reducing the number of mods.");
                     return;
                 }
@@ -85,7 +87,7 @@ namespace ModDllPreloader
             return [.. dlls.Values];
         }
 
-        private static void Deploy(List<string> dlls)
+        private static void DeleteAllDlls()
         {
             // 清空 plugins 目录
             if (Directory.Exists(PluginDir))
@@ -106,6 +108,11 @@ namespace ModDllPreloader
             {
                 Directory.CreateDirectory(PluginDir);
             }
+        }
+
+        private static void Deploy(List<string> dlls)
+        {
+            DeleteAllDlls();
 
             // 拷贝被 include 的 mod 的 DLL
             var failed = new List<string>();
